@@ -1,4 +1,4 @@
-import { ExchangeRate, ExchangeRateResponse } from '../types';
+// Currency utilities and exchange rate management
 
 // Free exchange rate API endpoint (no API key required)
 const EXCHANGE_API_URL = 'https://api.exchangerate-api.com/v4/latest';
@@ -10,40 +10,44 @@ const FALLBACK_API_URL = 'https://api.fxratesapi.com/latest';
 const STORAGE_KEY_RATES = 'groupsettle_exchange_rates';
 const STORAGE_KEY_RATES_TIMESTAMP = 'groupsettle_rates_timestamp';
 
-// Cache duration (24 hours in milliseconds)
-const CACHE_DURATION = 24 * 60 * 60 * 1000;
+// Cache duration (1 hour)
+const CACHE_DURATION = 60 * 60 * 1000; // 1 hour in milliseconds
+
+// Default fallback rates if API is unavailable
+const DEFAULT_RATES = {
+  USD: { SGD: 1.35, MYR: 4.65, CNY: 7.25, EUR: 0.92, GBP: 0.79, JPY: 148 },
+  SGD: { USD: 0.74, MYR: 3.45, CNY: 5.37, EUR: 0.68, GBP: 0.59, JPY: 109.8 },
+  MYR: { USD: 0.215, SGD: 0.29, CNY: 1.56, EUR: 0.20, GBP: 0.17, JPY: 31.8 },
+  CNY: { USD: 0.138, SGD: 0.186, MYR: 0.64, EUR: 0.127, GBP: 0.109, JPY: 20.4 },
+  EUR: { USD: 1.087, SGD: 1.47, MYR: 5.06, CNY: 7.88, GBP: 0.86, JPY: 161 },
+  GBP: { USD: 1.267, SGD: 1.71, MYR: 5.89, CNY: 9.17, EUR: 1.16, JPY: 187 },
+  JPY: { USD: 0.0068, SGD: 0.0091, MYR: 0.0315, CNY: 0.049, EUR: 0.0062, GBP: 0.0053 }
+};
+
+// Supported currencies with their display info
+export const SUPPORTED_CURRENCIES = {
+  USD: { name: 'US Dollar', symbol: '$', flag: '🇺🇸' },
+  EUR: { name: 'Euro', symbol: '€', flag: '🇪🇺' },
+  GBP: { name: 'British Pound', symbol: '£', flag: '🇬🇧' },
+  JPY: { name: 'Japanese Yen', symbol: '¥', flag: '🇯🇵' },
+  SGD: { name: 'Singapore Dollar', symbol: 'S$', flag: '🇸🇬' },
+  MYR: { name: 'Malaysian Ringgit', symbol: 'RM', flag: '🇲🇾' },
+  CNY: { name: 'Chinese Yuan', symbol: '¥', flag: '🇨🇳' },
+  AUD: { name: 'Australian Dollar', symbol: 'A$', flag: '🇦🇺' },
+  CAD: { name: 'Canadian Dollar', symbol: 'C$', flag: '🇨🇦' },
+  CHF: { name: 'Swiss Franc', symbol: 'CHF', flag: '🇨🇭' },
+  HKD: { name: 'Hong Kong Dollar', symbol: 'HK$', flag: '🇭🇰' },
+  NZD: { name: 'New Zealand Dollar', symbol: 'NZ$', flag: '🇳🇿' },
+  SEK: { name: 'Swedish Krona', symbol: 'kr', flag: '🇸🇪' },
+  NOK: { name: 'Norwegian Krone', symbol: 'kr', flag: '🇳🇴' },
+  DKK: { name: 'Danish Krone', symbol: 'kr', flag: '🇩🇰' }
+};
 
 interface CachedRates {
   rates: Record<string, number>;
   baseCurrency: string;
   timestamp: number;
 }
-
-/**
- * Supported currencies with their display information
- */
-export const SUPPORTED_CURRENCIES = {
-  USD: { name: 'US Dollar', symbol: '$', flag: '🇺🇸' },
-  EUR: { name: 'Euro', symbol: '€', flag: '🇪🇺' },
-  GBP: { name: 'British Pound', symbol: '£', flag: '🇬🇧' },
-  JPY: { name: 'Japanese Yen', symbol: '¥', flag: '🇯🇵' },
-  CAD: { name: 'Canadian Dollar', symbol: 'C$', flag: '🇨🇦' },
-  AUD: { name: 'Australian Dollar', symbol: 'A$', flag: '🇦🇺' },
-  CHF: { name: 'Swiss Franc', symbol: 'CHF', flag: '🇨🇭' },
-  CNY: { name: 'Chinese Yuan', symbol: '¥', flag: '🇨🇳' },
-  INR: { name: 'Indian Rupee', symbol: '₹', flag: '🇮🇳' },
-  KRW: { name: 'South Korean Won', symbol: '₩', flag: '🇰🇷' },
-  SGD: { name: 'Singapore Dollar', symbol: 'S$', flag: '🇸🇬' },
-  HKD: { name: 'Hong Kong Dollar', symbol: 'HK$', flag: '🇭🇰' },
-  NZD: { name: 'New Zealand Dollar', symbol: 'NZ$', flag: '🇳🇿' },
-  SEK: { name: 'Swedish Krona', symbol: 'kr', flag: '🇸🇪' },
-  NOK: { name: 'Norwegian Krone', symbol: 'kr', flag: '🇳🇴' },
-  DKK: { name: 'Danish Krone', symbol: 'kr', flag: '🇩🇰' },
-  PLN: { name: 'Polish Zloty', symbol: 'zł', flag: '🇵🇱' },
-  CZK: { name: 'Czech Koruna', symbol: 'Kč', flag: '🇨🇿' },
-  HUF: { name: 'Hungarian Forint', symbol: 'Ft', flag: '🇭🇺' },
-  RON: { name: 'Romanian Leu', symbol: 'lei', flag: '🇷🇴' }
-};
 
 /**
  * Get cached exchange rates from localStorage
@@ -53,10 +57,11 @@ function getCachedRates(): CachedRates | null {
     const cached = localStorage.getItem(STORAGE_KEY_RATES);
     if (!cached) return null;
     
-    const data = JSON.parse(cached) as CachedRates;
+    const data: CachedRates = JSON.parse(cached);
     
-    // Check if cache is still valid
-    if (Date.now() - data.timestamp > CACHE_DURATION) {
+    // Check if cache is still valid (less than 1 hour old)
+    const now = Date.now();
+    if (now - data.timestamp > CACHE_DURATION) {
       return null;
     }
     
@@ -65,4 +70,242 @@ function getCachedRates(): CachedRates | null {
     console.warn('Failed to parse cached exchange rates:', error);
     return null;
   }
-}\n\n/**\n * Cache exchange rates to localStorage\n */\nfunction cacheRates(rates: Record<string, number>, baseCurrency: string): void {\n  try {\n    const data: CachedRates = {\n      rates,\n      baseCurrency,\n      timestamp: Date.now()\n    };\n    \n    localStorage.setItem(STORAGE_KEY_RATES, JSON.stringify(data));\n  } catch (error) {\n    console.warn('Failed to cache exchange rates:', error);\n  }\n}\n\n/**\n * Fetch exchange rates from API\n */\nasync function fetchRatesFromAPI(baseCurrency: string = 'USD'): Promise<Record<string, number> | null> {\n  const urls = [\n    `${EXCHANGE_API_URL}/${baseCurrency}`,\n    `${FALLBACK_API_URL}?base=${baseCurrency}`\n  ];\n  \n  for (const url of urls) {\n    try {\n      const response = await fetch(url);\n      \n      if (!response.ok) {\n        throw new Error(`HTTP ${response.status}`);\n      }\n      \n      const data = await response.json();\n      \n      // Handle different API response formats\n      if (data.rates) {\n        return data.rates;\n      } else if (data.conversion_rates) {\n        return data.conversion_rates;\n      }\n      \n      throw new Error('Invalid API response format');\n    } catch (error) {\n      console.warn(`Failed to fetch from ${url}:`, error);\n    }\n  }\n  \n  return null;\n}\n\n/**\n * Get exchange rates with caching\n */\nexport async function getExchangeRates(\n  baseCurrency: string = 'USD',\n  forceRefresh: boolean = false\n): Promise<Record<string, number> | null> {\n  // Try to get cached rates first (unless force refresh is requested)\n  if (!forceRefresh) {\n    const cached = getCachedRates();\n    if (cached && cached.baseCurrency === baseCurrency) {\n      return cached.rates;\n    }\n  }\n  \n  // Fetch fresh rates from API\n  const freshRates = await fetchRatesFromAPI(baseCurrency);\n  \n  if (freshRates) {\n    cacheRates(freshRates, baseCurrency);\n    return freshRates;\n  }\n  \n  // If API fails, try to return cached rates even if expired\n  const cached = getCachedRates();\n  if (cached && cached.baseCurrency === baseCurrency) {\n    console.warn('Using expired exchange rates due to API failure');\n    return cached.rates;\n  }\n  \n  return null;\n}\n\n/**\n * Convert amount between currencies\n */\nexport async function convertCurrency(\n  amount: number,\n  fromCurrency: string,\n  toCurrency: string,\n  customRates?: Record<string, number>\n): Promise<{ convertedAmount: number; rate: number; } | null> {\n  // If currencies are the same, no conversion needed\n  if (fromCurrency === toCurrency) {\n    return { convertedAmount: amount, rate: 1 };\n  }\n  \n  let rates: Record<string, number> | null;\n  \n  if (customRates) {\n    rates = customRates;\n  } else {\n    rates = await getExchangeRates(fromCurrency);\n  }\n  \n  if (!rates) {\n    return null;\n  }\n  \n  const rate = rates[toCurrency];\n  if (typeof rate !== 'number') {\n    return null;\n  }\n  \n  const convertedAmount = amount * rate;\n  \n  return { convertedAmount, rate };\n}\n\n/**\n * Format currency amount with proper symbol and formatting\n */\nexport function formatCurrency(\n  amount: number,\n  currencyCode: string,\n  options: {\n    showSymbol?: boolean;\n    showCode?: boolean;\n    minimumFractionDigits?: number;\n    maximumFractionDigits?: number;\n  } = {}\n): string {\n  const {\n    showSymbol = true,\n    showCode = false,\n    minimumFractionDigits = 2,\n    maximumFractionDigits = 2\n  } = options;\n  \n  const currency = SUPPORTED_CURRENCIES[currencyCode as keyof typeof SUPPORTED_CURRENCIES];\n  \n  // Format the number\n  const formattedAmount = amount.toLocaleString('en-US', {\n    minimumFractionDigits,\n    maximumFractionDigits\n  });\n  \n  // Build the display string\n  let result = '';\n  \n  if (showSymbol && currency?.symbol) {\n    result = `${currency.symbol}${formattedAmount}`;\n  } else {\n    result = formattedAmount;\n  }\n  \n  if (showCode) {\n    result += ` ${currencyCode}`;\n  }\n  \n  return result;\n}\n\n/**\n * Get currency info\n */\nexport function getCurrencyInfo(currencyCode: string) {\n  return SUPPORTED_CURRENCIES[currencyCode as keyof typeof SUPPORTED_CURRENCIES] || {\n    name: currencyCode,\n    symbol: currencyCode,\n    flag: '💰'\n  };\n}\n\n/**\n * Get all supported currencies as array for UI components\n */\nexport function getSupportedCurrencies() {\n  return Object.entries(SUPPORTED_CURRENCIES).map(([code, info]) => ({\n    code,\n    ...info\n  }));\n}\n\n/**\n * Check if we're online\n */\nexport function isOnline(): boolean {\n  return navigator.onLine;\n}\n\n/**\n * Get cache age in milliseconds\n */\nexport function getCacheAge(): number | null {\n  const cached = getCachedRates();\n  if (!cached) return null;\n  \n  return Date.now() - cached.timestamp;\n}\n\n/**\n * Check if cache is fresh (less than 1 hour old)\n */\nexport function isCacheFresh(): boolean {\n  const age = getCacheAge();\n  if (age === null) return false;\n  \n  return age < (60 * 60 * 1000); // 1 hour\n}\n\n/**\n * Clear cached exchange rates\n */\nexport function clearCachedRates(): void {\n  try {\n    localStorage.removeItem(STORAGE_KEY_RATES);\n    localStorage.removeItem(STORAGE_KEY_RATES_TIMESTAMP);\n  } catch (error) {\n    console.warn('Failed to clear cached rates:', error);\n  }\n}"
+}
+
+/**
+ * Cache exchange rates to localStorage
+ */
+function cacheRates(rates: Record<string, number>, baseCurrency: string): void {
+  try {
+    const data: CachedRates = {
+      rates,
+      baseCurrency,
+      timestamp: Date.now()
+    };
+    
+    localStorage.setItem(STORAGE_KEY_RATES, JSON.stringify(data));
+  } catch (error) {
+    console.warn('Failed to cache exchange rates:', error);
+  }
+}
+
+/**
+ * Fetch exchange rates from API
+ */
+async function fetchRatesFromAPI(baseCurrency: string = 'USD'): Promise<Record<string, number> | null> {
+  const urls = [
+    `${EXCHANGE_API_URL}/${baseCurrency}`,
+    `${FALLBACK_API_URL}?base=${baseCurrency}`
+  ];
+  
+  for (const url of urls) {
+    try {
+      const response = await fetch(url);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+      
+      const data = await response.json();
+      
+      // Handle different API response formats
+      if (data.rates) {
+        return data.rates;
+      } else if (data.conversion_rates) {
+        return data.conversion_rates;
+      }
+      
+      throw new Error('Invalid API response format');
+    } catch (error) {
+      console.warn(`Failed to fetch from ${url}:`, error);
+    }
+  }
+  
+  return null;
+}
+
+/**
+ * Get exchange rates with caching
+ */
+export async function getExchangeRates(
+  baseCurrency: string = 'USD',
+  forceRefresh: boolean = false
+): Promise<Record<string, number> | null> {
+  // Try to get cached rates first (unless force refresh is requested)
+  if (!forceRefresh) {
+    const cached = getCachedRates();
+    if (cached && cached.baseCurrency === baseCurrency) {
+      return cached.rates;
+    }
+  }
+  
+  // Fetch fresh rates from API
+  const freshRates = await fetchRatesFromAPI(baseCurrency);
+  
+  if (freshRates) {
+    cacheRates(freshRates, baseCurrency);
+    return freshRates;
+  }
+  
+  // If API fails, try to return cached rates even if expired
+  const cached = getCachedRates();
+  if (cached && cached.baseCurrency === baseCurrency) {
+    console.warn('Using expired exchange rates due to API failure');
+    return cached.rates;
+  }
+  
+  // As last resort, use default rates
+  const defaultForBase = DEFAULT_RATES[baseCurrency as keyof typeof DEFAULT_RATES];
+  if (defaultForBase) {
+    console.warn('Using default exchange rates due to API and cache failure');
+    return defaultForBase;
+  }
+  
+  return null;
+}
+
+/**
+ * Convert amount between currencies
+ */
+export async function convertCurrency(
+  amount: number,
+  fromCurrency: string,
+  toCurrency: string,
+  customRates?: Record<string, number>
+): Promise<{ convertedAmount: number; rate: number; } | null> {
+  // If currencies are the same, no conversion needed
+  if (fromCurrency === toCurrency) {
+    return { convertedAmount: amount, rate: 1 };
+  }
+  
+  let rates: Record<string, number> | null;
+  
+  if (customRates) {
+    rates = customRates;
+  } else {
+    rates = await getExchangeRates(fromCurrency);
+  }
+  
+  if (!rates) {
+    // Try default rates as fallback
+    const defaultForBase = DEFAULT_RATES[fromCurrency as keyof typeof DEFAULT_RATES];
+    if (defaultForBase) {
+      rates = defaultForBase;
+    } else {
+      return null;
+    }
+  }
+  
+  const rate = rates[toCurrency];
+  if (typeof rate !== 'number') {
+    return null;
+  }
+  
+  const convertedAmount = amount * rate;
+  
+  return { convertedAmount, rate };
+}
+
+/**
+ * Format currency amount with proper symbol and formatting
+ */
+export function formatCurrency(
+  amount: number,
+  currencyCode: string,
+  options: {
+    showSymbol?: boolean;
+    showCode?: boolean;
+    minimumFractionDigits?: number;
+    maximumFractionDigits?: number;
+  } = {}
+): string {
+  const {
+    showSymbol = true,
+    showCode = false,
+    minimumFractionDigits = 2,
+    maximumFractionDigits = 2
+  } = options;
+  
+  const currency = SUPPORTED_CURRENCIES[currencyCode as keyof typeof SUPPORTED_CURRENCIES];
+  
+  // Format the number
+  const formattedAmount = amount.toLocaleString('en-US', {
+    minimumFractionDigits,
+    maximumFractionDigits
+  });
+  
+  // Build the display string
+  let result = '';
+  
+  if (showSymbol && currency?.symbol) {
+    result = `${currency.symbol}${formattedAmount}`;
+  } else {
+    result = formattedAmount;
+  }
+  
+  if (showCode) {
+    result += ` ${currencyCode}`;
+  }
+  
+  return result;
+}
+
+/**
+ * Get currency info
+ */
+export function getCurrencyInfo(currencyCode: string) {
+  return SUPPORTED_CURRENCIES[currencyCode as keyof typeof SUPPORTED_CURRENCIES] || {
+    name: currencyCode,
+    symbol: currencyCode,
+    flag: '💰'
+  };
+}
+
+/**
+ * Get all supported currencies as array for UI components
+ */
+export function getSupportedCurrencies() {
+  return Object.entries(SUPPORTED_CURRENCIES).map(([code, info]) => ({
+    code,
+    ...info
+  }));
+}
+
+/**
+ * Check if we're online
+ */
+export function isOnline(): boolean {
+  return navigator.onLine;
+}
+
+/**
+ * Get cache age in milliseconds
+ */
+export function getCacheAge(): number | null {
+  const cached = getCachedRates();
+  if (!cached) return null;
+  
+  return Date.now() - cached.timestamp;
+}
+
+/**
+ * Check if cache is fresh (less than 1 hour old)
+ */
+export function isCacheFresh(): boolean {
+  const age = getCacheAge();
+  if (age === null) return false;
+  
+  return age < CACHE_DURATION;
+}
+
+/**
+ * Clear cached exchange rates
+ */
+export function clearCachedRates(): void {
+  try {
+    localStorage.removeItem(STORAGE_KEY_RATES);
+    localStorage.removeItem(STORAGE_KEY_RATES_TIMESTAMP);
+  } catch (error) {
+    console.warn('Failed to clear cached rates:', error);
+  }
+}

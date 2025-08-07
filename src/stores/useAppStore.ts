@@ -1,11 +1,8 @@
 import { create } from 'zustand';
 import { 
   User, 
-  Group, 
   AppSettings, 
-  SyncStatus, 
-  Balance, 
-  OptimalPayment 
+  SyncStatus 
 } from '../types';
 import {
   getCurrentUser,

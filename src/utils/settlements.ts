@@ -1,7 +1,6 @@
 // Settlement calculation utilities
 
 import { Balance, OptimalPayment } from '../types';
-import { formatCurrency as formatCurrencyUtil } from './currency';
 
 /**
  * Calculate optimal payments grouped by currency

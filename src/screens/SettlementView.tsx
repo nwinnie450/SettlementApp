@@ -1,16 +1,14 @@
 import React, { useEffect } from 'react';
-import Card from '../components/ui/Card';
-import Button from '../components/ui/Button';
 import { useAppStore } from '../stores/useAppStore';
 import { useGroupStore } from '../stores/useGroupStore';
-import { formatCurrency, generateSettlementSummary, isGroupSettled, calculateOptimalPayments } from '../utils/settlements';
+import { formatCurrency, isGroupSettled, calculateOptimalPayments } from '../utils/settlements';
+import { SettlementStatus } from '../types';
 
 const SettlementView: React.FC = () => {
   const { currentUser } = useAppStore();
   const { 
     currentGroup, 
     balances, 
-    optimalPayments, 
     isCalculatingSettlements,
     calculateSettlements,
     recalculateAll,
@@ -148,7 +146,7 @@ const SettlementView: React.FC = () => {
     
     return currentGroup.settlements.some(settlement => {
       const settlementKey = `${settlement.fromUserId}-${settlement.toUserId}-${Math.round(settlement.amount * 100)}-${settlement.currency}`;
-      return settlementKey === paymentKey && settlement.status === 'COMPLETED';
+      return settlementKey === paymentKey && settlement.status === SettlementStatus.COMPLETED;
     });
   };
 
@@ -261,10 +259,10 @@ const SettlementView: React.FC = () => {
                 cursor: isCalculatingSettlements ? 'not-allowed' : 'pointer'
               }}
               onMouseOver={(e) => {
-                if (!isCalculatingSettlements) e.target.style.backgroundColor = '#0d9488';
+                if (!isCalculatingSettlements) (e.target as HTMLButtonElement).style.backgroundColor = '#0d9488';
               }}
               onMouseOut={(e) => {
-                if (!isCalculatingSettlements) e.target.style.backgroundColor = '#14b8a6';
+                if (!isCalculatingSettlements) (e.target as HTMLButtonElement).style.backgroundColor = '#14b8a6';
               }}
             >
               {isCalculatingSettlements ? '⏳ Calculating...' : '🔄 Recalculate'}
@@ -284,10 +282,10 @@ const SettlementView: React.FC = () => {
                   cursor: 'pointer'
                 }}
                 onMouseOver={(e) => {
-                  e.target.style.backgroundColor = showSimplified ? '#d97706' : '#4b5563';
+                  (e.target as HTMLButtonElement).style.backgroundColor = showSimplified ? '#d97706' : '#4b5563';
                 }}
                 onMouseOut={(e) => {
-                  e.target.style.backgroundColor = showSimplified ? '#f59e0b' : '#6b7280';
+                  (e.target as HTMLButtonElement).style.backgroundColor = showSimplified ? '#f59e0b' : '#6b7280';
                 }}
               >
                 {showSimplified ? '📋 Multi-Currency' : '🔄 Simplify'}
@@ -433,12 +431,12 @@ const SettlementView: React.FC = () => {
                         }}
                         onMouseOver={(e) => {
                           if (selectedSettlementCurrency !== currency) {
-                            e.target.style.backgroundColor = '#f3f4f6';
+                            (e.target as HTMLButtonElement).style.backgroundColor = '#f3f4f6';
                           }
                         }}
                         onMouseOut={(e) => {
                           if (selectedSettlementCurrency !== currency) {
-                            e.target.style.backgroundColor = 'white';
+                            (e.target as HTMLButtonElement).style.backgroundColor = 'white';
                           }
                         }}
                       >
@@ -534,12 +532,12 @@ const SettlementView: React.FC = () => {
                               }}
                               onMouseOver={(e) => {
                                 if (!isProcessing && !isProcessed) {
-                                  e.target.style.backgroundColor = '#0d9488';
+                                  (e.target as HTMLButtonElement).style.backgroundColor = '#0d9488';
                                 }
                               }}
                               onMouseOut={(e) => {
                                 if (!isProcessing && !isProcessed) {
-                                  e.target.style.backgroundColor = '#14b8a6';
+                                  (e.target as HTMLButtonElement).style.backgroundColor = '#14b8a6';
                                 }
                               }}
                             >
@@ -644,12 +642,12 @@ const SettlementView: React.FC = () => {
                               }}
                               onMouseOver={(e) => {
                                 if (!isProcessing && !isProcessed) {
-                                  e.target.style.backgroundColor = '#0d9488';
+                                  (e.target as HTMLButtonElement).style.backgroundColor = '#0d9488';
                                 }
                               }}
                               onMouseOut={(e) => {
                                 if (!isProcessing && !isProcessed) {
-                                  e.target.style.backgroundColor = '#14b8a6';
+                                  (e.target as HTMLButtonElement).style.backgroundColor = '#14b8a6';
                                 }
                               }}
                             >

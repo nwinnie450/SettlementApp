@@ -1,12 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Button from '../components/ui/Button';
-import Input from '../components/ui/Input';
-import Card from '../components/ui/Card';
 import ManageMembers from '../components/forms/ManageMembers';
 import { useAppStore } from '../stores/useAppStore';
 import { useGroupStore } from '../stores/useGroupStore';
-import { Group, Expense, ExpenseSplit } from '../types';
+import { Expense, ExpenseSplit } from '../types';
 
 type SplitType = 'equal' | 'custom' | 'percentage';
 
@@ -151,7 +148,7 @@ const AddExpense: React.FC = () => {
         category: formData.category,
         date: new Date(formData.date).toISOString(),
         paidBy: formData.paidBy,
-        photo: formData.photo,
+        photo: formData.photo || undefined,
         splits: calculateSplits(),
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
@@ -284,8 +281,8 @@ const AddExpense: React.FC = () => {
               border: 'none',
               cursor: 'pointer'
             }}
-            onMouseOver={(e) => e.target.style.backgroundColor = '#f3f4f6'}
-            onMouseOut={(e) => e.target.style.backgroundColor = 'transparent'}
+            onMouseOver={(e) => (e.target as HTMLButtonElement).style.backgroundColor = '#f3f4f6'}
+            onMouseOut={(e) => (e.target as HTMLButtonElement).style.backgroundColor = 'transparent'}
           >
             <svg style={{ width: '24px', height: '24px', color: '#6b7280' }} fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
               <path d="M15 18l-6-6 6-6" />
@@ -562,8 +559,8 @@ const AddExpense: React.FC = () => {
                   alignItems: 'center',
                   gap: '6px'
                 }}
-                onMouseOver={(e) => e.target.style.backgroundColor = '#0d9488'}
-                onMouseOut={(e) => e.target.style.backgroundColor = '#14b8a6'}
+                onMouseOver={(e) => (e.target as HTMLButtonElement).style.backgroundColor = '#0d9488'}
+                onMouseOut={(e) => (e.target as HTMLButtonElement).style.backgroundColor = '#14b8a6'}
               >
                 👥 Manage Members
               </button>

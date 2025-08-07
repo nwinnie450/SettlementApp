@@ -5,8 +5,6 @@ import {
   Settlement, 
   Balance, 
   OptimalPayment, 
-  ExpenseCategory,
-  SplitMethod,
   SettlementStatus 
 } from '../types';
 import {
@@ -18,7 +16,6 @@ import {
   setActiveGroupId
 } from '../utils/storage';
 import { calculateOptimalPayments } from '../utils/settlements';
-import { convertCurrency } from '../utils/currency';
 
 interface GroupState {
   // Data
