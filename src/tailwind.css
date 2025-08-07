@@ -1,0 +1,16 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Mobile-optimized touch targets */
+@layer utilities {
+  .touch-manipulation {
+    touch-action: manipulation;
+  }
+  
+  /* Ensure minimum touch target size for mobile */
+  .touch-target {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
