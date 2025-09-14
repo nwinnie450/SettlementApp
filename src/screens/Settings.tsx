@@ -45,9 +45,9 @@ const Settings: React.FC = () => {
   };
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: 'var(--color-background)' }}>
+    <div style={{ minHeight: '100vh', backgroundColor: '#f9fafb' }}>
       {/* Header */}
-      <div style={{ backgroundColor: 'white', padding: '16px', borderBottom: '1px solid var(--color-border)' }}>
+      <div style={{ backgroundColor: 'white', padding: '16px', borderBottom: '1px solid #e5e7eb' }}>
         <div style={{ maxWidth: '448px', margin: '0 auto' }}>
           <h1 style={{ fontSize: '18px', fontWeight: '500', color: 'var(--color-text-primary)' }}>
             ⚙️ Settings
@@ -151,14 +151,14 @@ const Settings: React.FC = () => {
               style={{
                 width: '100%',
                 padding: '12px',
-                border: '1px solid var(--color-border)',
+                border: '1px solid #d1d5db',
                 borderRadius: '6px',
                 fontSize: '16px',
                 backgroundColor: 'white',
-                color: 'var(--color-text-primary)'
+                color: '#1f2937'
               }}
-              onFocus={(e) => e.target.style.borderColor = 'var(--color-primary)'}
-              onBlur={(e) => e.target.style.borderColor = 'var(--color-border)'}
+              onFocus={(e) => e.target.style.borderColor = '#14b8a6'}
+              onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
             >
               {currencies.map(currency => (
                 <option key={currency.code} value={currency.code}>

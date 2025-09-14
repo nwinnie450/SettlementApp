@@ -232,9 +232,9 @@ const SettlementView: React.FC = () => {
           }
         `}
       </style>
-      <div style={{ minHeight: '100vh', backgroundColor: 'var(--color-background)' }}>
+      <div style={{ minHeight: '100vh', backgroundColor: '#f9fafb' }}>
       {/* Header */}
-      <div style={{ backgroundColor: 'white', padding: '16px', borderBottom: '1px solid var(--color-border)' }}>
+      <div style={{ backgroundColor: 'white', padding: '16px', borderBottom: '1px solid #e5e7eb' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', maxWidth: '448px', margin: '0 auto' }}>
           <div>
             <h1 style={{ fontSize: '18px', fontWeight: '500', color: 'var(--color-text-primary)', marginBottom: '4px' }}>

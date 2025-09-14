@@ -323,9 +323,10 @@ const AddExpense: React.FC = () => {
                   border: '1px solid var(--color-border)',
                   borderRadius: '6px',
                   outline: 'none',
-                  backgroundColor: 'white'
+                  backgroundColor: 'white',
+                  color: '#1f2937'
                 }}
-                onFocus={(e) => e.target.style.borderColor = 'var(--color-primary)'}
+                onFocus={(e) => e.target.style.borderColor = '#14b8a6'}
                 onBlur={(e) => e.target.style.borderColor = 'var(--color-border)'}
               />
               {formData.photo && (
@@ -377,7 +378,8 @@ const AddExpense: React.FC = () => {
                   border: errors.description ? '1px solid #ef4444' : '1px solid #d1d5db',
                   borderRadius: '6px',
                   outline: 'none',
-                  backgroundColor: 'white'
+                  backgroundColor: 'white',
+                  color: '#1f2937'
                 }}
                 onFocus={(e) => e.target.style.borderColor = '#14b8a6'}
                 onBlur={(e) => e.target.style.borderColor = errors.description ? '#ef4444' : '#d1d5db'}
@@ -432,9 +434,10 @@ const AddExpense: React.FC = () => {
                   border: errors.amount ? '1px solid var(--color-error)' : '1px solid var(--color-border)',
                     borderRadius: '6px',
                     outline: 'none',
-                    backgroundColor: 'white'
+                    backgroundColor: 'white',
+                    color: '#1f2937'
                   }}
-                onFocus={(e) => e.target.style.borderColor = 'var(--color-primary)'}
+                onFocus={(e) => e.target.style.borderColor = '#14b8a6'}
                 onBlur={(e) => e.target.style.borderColor = errors.amount ? 'var(--color-error)' : 'var(--color-border)'}
                 />
                 {errors.amount && (

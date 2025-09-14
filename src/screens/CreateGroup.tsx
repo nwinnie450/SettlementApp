@@ -154,7 +154,8 @@ const CreateGroup: React.FC = () => {
                 border: errors.groupName ? '1px solid #ef4444' : '1px solid #d1d5db',
                 borderRadius: '6px',
                 outline: 'none',
-                backgroundColor: 'white'
+                backgroundColor: 'white',
+                color: '#1f2937'
               }}
               onFocus={(e) => e.target.style.borderColor = '#14b8a6'}
               onBlur={(e) => e.target.style.borderColor = errors.groupName ? '#ef4444' : '#d1d5db'}
