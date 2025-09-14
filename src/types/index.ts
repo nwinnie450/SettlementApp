@@ -3,10 +3,12 @@
 export interface User {
   id: string;
   name: string;
-  email?: string;
+  email: string;
   avatar?: string;
   defaultCurrency: string;
   createdAt: string;
+  updatedAt: string;
+  isEmailVerified: boolean;
 }
 
 export interface Group {
@@ -17,18 +19,37 @@ export interface Group {
   members: GroupMember[];
   expenses: Expense[];
   settlements: Settlement[];
+  invites: GroupInvite[];
   createdAt: string;
   updatedAt: string;
   createdBy: string;
   qrCode?: string;
+  inviteCode: string;
+  adminIds: string[];
 }
 
 export interface GroupMember {
   userId: string;
   name: string;
+  email: string;
   joinedAt: string;
   isActive: boolean;
   avatar?: string;
+  role: GroupRole;
+}
+
+export interface GroupInvite {
+  id: string;
+  groupId: string;
+  inviterUserId: string;
+  inviterName: string;
+  inviteeEmail?: string;
+  inviteeUserId?: string;
+  status: InviteStatus;
+  message?: string;
+  createdAt: string;
+  respondedAt?: string;
+  expiresAt: string;
 }
 
 export interface Expense {
@@ -141,6 +162,18 @@ export enum SettlementStatus {
   PENDING = 'pending',
   COMPLETED = 'completed',
   CANCELLED = 'cancelled'
+}
+
+export enum GroupRole {
+  ADMIN = 'admin',
+  MEMBER = 'member'
+}
+
+export enum InviteStatus {
+  PENDING = 'pending',
+  ACCEPTED = 'accepted',
+  DECLINED = 'declined',
+  EXPIRED = 'expired'
 }
 
 export enum SyncStatus {
@@ -338,3 +371,92 @@ export type DeepPartial<T> = {
 export type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
 
 export type Optional<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
+
+// Authentication types
+export interface AuthUser {
+  id: string;
+  email: string;
+  name: string;
+  avatar?: string;
+  defaultCurrency: string;
+  isEmailVerified: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface LoginCredentials {
+  email: string;
+  password: string;
+}
+
+export interface RegisterCredentials {
+  name: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+  defaultCurrency: string;
+}
+
+export interface AuthResponse {
+  success: boolean;
+  user?: AuthUser;
+  token?: string;
+  message?: string;
+  error?: string;
+}
+
+export interface PasswordResetRequest {
+  email: string;
+}
+
+export interface PasswordResetData {
+  token: string;
+  newPassword: string;
+  confirmPassword: string;
+}
+
+// Group invitation types
+export interface GroupInviteLink {
+  groupId: string;
+  groupName: string;
+  inviteCode: string;
+  inviterName: string;
+  expiresAt: string;
+  url: string;
+}
+
+export interface JoinGroupRequest {
+  inviteCode: string;
+  userId?: string;
+  userEmail?: string;
+  userName?: string;
+  message?: string;
+}
+
+export interface GroupJoinResponse {
+  success: boolean;
+  requiresApproval: boolean;
+  inviteId?: string;
+  group?: Group;
+  message?: string;
+  error?: string;
+}
+
+// Auth state types
+export interface AuthState {
+  user: AuthUser | null;
+  isAuthenticated: boolean;
+  isLoading: boolean;
+  error: string | null;
+  pendingInvites: GroupInvite[];
+}
+
+// Group management types
+export interface GroupManagementPermissions {
+  canInviteMembers: boolean;
+  canRemoveMembers: boolean;
+  canEditGroup: boolean;
+  canDeleteGroup: boolean;
+  canManageInvites: boolean;
+  canViewAllExpenses: boolean;
+}

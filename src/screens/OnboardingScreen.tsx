@@ -78,7 +78,7 @@ const OnboardingScreen: React.FC = () => {
       {/* CTA */}
       <div>
         <button
-          onClick={() => navigate('/create-group')}
+          onClick={() => navigate('/register')}
           style={{
             width: '100%',
             padding: '16px',
@@ -97,7 +97,7 @@ const OnboardingScreen: React.FC = () => {
           Get started
         </button>
         <button
-          onClick={() => navigate('/')}
+          onClick={() => navigate('/login')}
           style={{
             width: '100%',
             padding: '8px',

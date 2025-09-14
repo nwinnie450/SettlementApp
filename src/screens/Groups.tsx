@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAppStore } from '../stores/useAppStore';
+import { useAuthStore } from '../stores/useAuthStore';
 import { useGroupStore } from '../stores/useGroupStore';
+import GroupInviteManager from '../components/GroupInviteManager';
 import { Group } from '../types';
 
 const Groups: React.FC = () => {
   const navigate = useNavigate();
-  const { currentUser } = useAppStore();
+  const { user } = useAuthStore();
   const { 
     groups, 
     currentGroup, 
@@ -18,9 +19,10 @@ const Groups: React.FC = () => {
 
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [newGroupName, setNewGroupName] = useState('');
-  const [newGroupCurrency, setNewGroupCurrency] = useState('SGD');
+  const [newGroupCurrency, setNewGroupCurrency] = useState('USD');
   const [isCreating, setIsCreating] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null);
+  const [selectedGroupForInvite, setSelectedGroupForInvite] = useState<Group | null>(null);
 
   useEffect(() => {
     loadGroups();
@@ -28,22 +30,22 @@ const Groups: React.FC = () => {
 
   // Redirect to create group if no groups exist
   useEffect(() => {
-    if (groups.length === 0 && currentUser) {
+    if (groups.length === 0 && user) {
       navigate('/create-group');
     }
-  }, [groups, currentUser, navigate]);
+  }, [groups, user, navigate]);
 
   const handleCreateGroup = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!currentUser || !newGroupName.trim()) return;
+    if (!user || !newGroupName.trim()) return;
 
     setIsCreating(true);
     try {
-      const group = createGroup(newGroupName.trim(), newGroupCurrency, currentUser.id);
+      const group = createGroup(newGroupName.trim(), newGroupCurrency, user.id, user.name, user.email);
       setCurrentGroup(group.id);
       setShowCreateModal(false);
       setNewGroupName('');
-      setNewGroupCurrency('SGD');
+      setNewGroupCurrency('USD');
       navigate('/'); // Go to dashboard with new group
     } catch (error) {
       console.error('Failed to create group:', error);
@@ -207,7 +209,7 @@ const Groups: React.FC = () => {
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 {groups.map((group) => {
                   const isCurrentGroup = currentGroup?.id === group.id;
-                  const isOwner = group.createdBy === currentUser?.id;
+                  const isOwner = group.createdBy === user?.id;
                   
                   return (
                     <div 
@@ -286,6 +288,28 @@ const Groups: React.FC = () => {
                             <span style={{ fontSize: '12px', color: '#14b8a6', fontWeight: '500' }}>
                               Tap to select →
                             </span>
+                          )}
+                          {isOwner && (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedGroupForInvite(group);
+                              }}
+                              style={{
+                                padding: '4px',
+                                backgroundColor: '#14b8a6',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '4px',
+                                cursor: 'pointer',
+                                fontSize: '10px',
+                                fontWeight: '500',
+                                marginRight: '4px'
+                              }}
+                              title="Invite members"
+                            >
+                              📤 Invite
+                            </button>
                           )}
                           {isOwner && (
                             <button
@@ -535,6 +559,14 @@ const Groups: React.FC = () => {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Group Invite Manager Modal */}
+      {selectedGroupForInvite && (
+        <GroupInviteManager
+          group={selectedGroupForInvite}
+          onClose={() => setSelectedGroupForInvite(null)}
+        />
       )}
     </>
   );

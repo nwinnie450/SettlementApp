@@ -3,10 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
 import Card from '../components/ui/Card';
-import { useAppStore } from '../stores/useAppStore';
+import { useAuthStore } from '../stores/useAuthStore';
 import { useGroupStore } from '../stores/useGroupStore';
-import { saveUser } from '../utils/storage';
-import { User } from '../types';
 
 const DEFAULT_CURRENCIES = [
   { code: 'SGD', name: 'Singapore Dollar', symbol: 'S$' },
@@ -29,65 +27,38 @@ const OTHER_CURRENCIES = [
 
 const CreateGroup: React.FC = () => {
   const navigate = useNavigate();
-  const { currentUser, setCurrentUser } = useAppStore();
+  const { user } = useAuthStore();
   const { createGroup, setCurrentGroup } = useGroupStore();
-  
-  const [userName, setUserName] = useState(currentUser?.name || '');
+
   const [groupName, setGroupName] = useState('');
-  const [selectedCurrency, setSelectedCurrency] = useState('SGD');
+  const [selectedCurrency, setSelectedCurrency] = useState(user?.defaultCurrency || 'USD');
   const [showOtherCurrencies, setShowOtherCurrencies] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<{[key: string]: string}>({});
 
   const validateForm = () => {
     const newErrors: {[key: string]: string} = {};
-    
-    if (!userName.trim()) {
-      newErrors.userName = 'Your name is required';
-    }
-    
+
     if (!groupName.trim()) {
       newErrors.groupName = 'Group name is required';
     } else if (groupName.length < 3) {
       newErrors.groupName = 'Group name must be at least 3 characters';
     }
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleCreateGroup = async () => {
-    if (!validateForm()) return;
-    
+    if (!validateForm() || !user) return;
+
     setIsLoading(true);
     setErrors({}); // Clear previous errors
-    
+
     try {
-      // Create or update user if needed
-      let user = currentUser;
-      if (!user) {
-        user = {
-          id: `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-          name: userName.trim(),
-          defaultCurrency: selectedCurrency,
-          createdAt: new Date().toISOString()
-        };
-        console.log('Creating new user:', user);
-        saveUser(user); // Save user to localStorage
-        setCurrentUser(user); // This will also set isFirstTime to false
-      } else if (user.name !== userName.trim()) {
-        user = {
-          ...user,
-          name: userName.trim()
-        };
-        console.log('Updating user:', user);
-        saveUser(user); // Save updated user to localStorage
-        setCurrentUser(user);
-      }
-      
-      // Create the group
+      // Create the group with authenticated user info
       console.log('Creating group with:', { name: groupName.trim(), currency: selectedCurrency, userId: user.id });
-      const group = createGroup(groupName.trim(), selectedCurrency, user.id);
+      const group = createGroup(groupName.trim(), selectedCurrency, user.id, user.name, user.email);
       console.log('Group created:', group);
       
       // Set as active group
@@ -149,28 +120,19 @@ const CreateGroup: React.FC = () => {
         <div style={{ backgroundColor: 'white', borderRadius: '8px', padding: '20px', marginBottom: '16px', boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)', border: '1px solid #e5e7eb' }}>
           <div style={{ marginBottom: '8px' }}>
             <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#374151', marginBottom: '6px' }}>
-              Your name {errors.userName && <span style={{ color: '#ef4444' }}>*</span>}
+              Creating as
             </label>
-            <input
-              type="text"
-              placeholder="Enter your name"
-              value={userName}
-              onChange={(e) => setUserName(e.target.value)}
-              style={{
-                width: '100%',
-                padding: '12px',
-                fontSize: '16px',
-                border: errors.userName ? '1px solid #ef4444' : '1px solid #d1d5db',
-                borderRadius: '6px',
-                outline: 'none',
-                backgroundColor: 'white'
-              }}
-              onFocus={(e) => e.target.style.borderColor = '#14b8a6'}
-              onBlur={(e) => e.target.style.borderColor = errors.userName ? '#ef4444' : '#d1d5db'}
-            />
-            {errors.userName && (
-              <p style={{ color: '#ef4444', fontSize: '14px', marginTop: '4px' }}>{errors.userName}</p>
-            )}
+            <div style={{
+              width: '100%',
+              padding: '12px',
+              fontSize: '16px',
+              border: '1px solid #d1d5db',
+              borderRadius: '6px',
+              backgroundColor: '#f9fafb',
+              color: '#6b7280'
+            }}>
+              {user?.name} ({user?.email})
+            </div>
           </div>
         </div>
 

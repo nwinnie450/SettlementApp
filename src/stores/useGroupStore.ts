@@ -1,11 +1,17 @@
 import { create } from 'zustand';
-import { 
-  Group, 
-  Expense, 
-  Settlement, 
-  Balance, 
-  OptimalPayment, 
-  SettlementStatus 
+import {
+  Group,
+  Expense,
+  Settlement,
+  Balance,
+  OptimalPayment,
+  SettlementStatus,
+  GroupRole,
+  GroupInvite,
+  InviteStatus,
+  JoinGroupRequest,
+  GroupJoinResponse,
+  GroupInviteLink
 } from '../types';
 import {
   getGroups,
@@ -23,32 +29,40 @@ interface GroupState {
   currentGroup: Group | null;
   balances: Balance[];
   optimalPayments: OptimalPayment[];
-  
+
   // UI state
   isCalculatingSettlements: boolean;
-  
+  isLoading: boolean;
+
   // Actions - Groups
   loadGroups: () => void;
   initializeActiveGroup: () => void;
-  createGroup: (name: string, baseCurrency: string, createdBy: string) => Group;
+  createGroup: (name: string, baseCurrency: string, createdBy: string, creatorName: string, creatorEmail: string) => Group;
   updateGroup: (groupId: string, updates: Partial<Group>) => boolean;
   deleteGroup: (groupId: string) => boolean;
   setCurrentGroup: (groupId: string | null) => void;
-  
+
   // Actions - Members
-  addMember: (groupId: string, name: string) => boolean;
+  addMember: (groupId: string, name: string, email: string, role?: GroupRole) => boolean;
   removeMember: (groupId: string, userId: string) => boolean;
   updateMemberName: (groupId: string, userId: string, newName: string) => boolean;
-  
+
+  // Actions - Invitations
+  generateInviteLink: (groupId: string, inviterUserId: string) => GroupInviteLink | null;
+  joinGroupByInvite: (request: JoinGroupRequest) => Promise<GroupJoinResponse>;
+  approveInvite: (groupId: string, inviteId: string) => Promise<boolean>;
+  declineInvite: (groupId: string, inviteId: string) => Promise<boolean>;
+  getPendingInvites: (groupId: string) => GroupInvite[];
+
   // Actions - Expenses
   addExpense: (expense: Expense) => Promise<boolean>;
   updateExpense: (expenseId: string, updates: Partial<Expense>) => Promise<boolean>;
   deleteExpense: (expenseId: string) => Promise<boolean>;
-  
+
   // Actions - Settlements
   calculateSettlements: (groupId: string) => void;
   markSettlementPaid: (groupId: string, fromUserId: string, toUserId: string, amount: number, currency?: string) => Promise<boolean>;
-  
+
   // Utilities
   refreshBalances: (groupId: string) => void;
   refreshBalancesByCurrency: (groupId: string) => Record<string, Balance[]>;
@@ -62,6 +76,7 @@ export const useGroupStore = create<GroupState>((set, get) => ({
   balances: [],
   optimalPayments: [],
   isCalculatingSettlements: false,
+  isLoading: false,
 
   // Group management
   loadGroups: () => {
@@ -83,26 +98,30 @@ export const useGroupStore = create<GroupState>((set, get) => ({
     }
   },
 
-  createGroup: (name: string, baseCurrency: string, createdBy: string) => {
-    // Get user info from localStorage
-    const currentUser = JSON.parse(localStorage.getItem('currentUser') || 'null');
-    const userName = currentUser?.name || 'You';
-    
+  createGroup: (name: string, baseCurrency: string, createdBy: string, creatorName: string, creatorEmail: string) => {
+    const groupId = `group_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const inviteCode = `invite_${groupId}_${Date.now()}`;
+
     const newGroup: Group = {
-      id: `group_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      id: groupId,
       name,
       baseCurrency,
       members: [{
         userId: createdBy,
-        name: userName,
+        name: creatorName,
+        email: creatorEmail,
         joinedAt: new Date().toISOString(),
-        isActive: true
+        isActive: true,
+        role: GroupRole.ADMIN
       }],
       expenses: [],
       settlements: [],
+      invites: [],
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
-      createdBy
+      createdBy,
+      inviteCode,
+      adminIds: [createdBy]
     };
     
     if (saveGroup(newGroup)) {
@@ -347,15 +366,17 @@ export const useGroupStore = create<GroupState>((set, get) => ({
   },
 
   // Member management
-  addMember: (groupId: string, name: string) => {
+  addMember: (groupId: string, name: string, email: string, role: GroupRole = GroupRole.MEMBER) => {
     const group = getGroup(groupId);
     if (!group) return false;
-    
+
     const newMember = {
       userId: `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       name: name.trim(),
+      email: email.trim(),
       joinedAt: new Date().toISOString(),
-      isActive: true
+      isActive: true,
+      role
     };
     
     const updatedGroup = {
@@ -426,7 +447,7 @@ export const useGroupStore = create<GroupState>((set, get) => ({
   updateMemberName: (groupId: string, userId: string, newName: string) => {
     const group = getGroup(groupId);
     if (!group) return false;
-    
+
     const updatedGroup = {
       ...group,
       members: group.members.map(member =>
@@ -434,19 +455,198 @@ export const useGroupStore = create<GroupState>((set, get) => ({
       ),
       updatedAt: new Date().toISOString()
     };
-    
+
     if (saveGroup(updatedGroup)) {
-      const groups = get().groups.map(g => 
+      const groups = get().groups.map(g =>
         g.id === groupId ? updatedGroup : g
       );
-      set({ 
+      set({
         groups,
         currentGroup: get().currentGroup?.id === groupId ? updatedGroup : get().currentGroup
       });
       return true;
     }
-    
+
     return false;
+  },
+
+  // Invitation management
+  generateInviteLink: (groupId: string, inviterUserId: string) => {
+    const group = getGroup(groupId);
+    if (!group) return null;
+
+    const inviter = group.members.find(m => m.userId === inviterUserId);
+    if (!inviter) return null;
+
+    const baseUrl = window.location.origin;
+    const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(); // 7 days
+
+    const inviteLink: GroupInviteLink = {
+      groupId: group.id,
+      groupName: group.name,
+      inviteCode: group.inviteCode,
+      inviterName: inviter.name,
+      expiresAt,
+      url: `${baseUrl}/join-group?invite=${group.inviteCode}`
+    };
+
+    return inviteLink;
+  },
+
+  joinGroupByInvite: async (request: JoinGroupRequest) => {
+    set({ isLoading: true });
+
+    try {
+      // Simulate network delay
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      const groups = getGroups();
+      const group = groups.find(g => g.inviteCode === request.inviteCode);
+
+      if (!group) {
+        set({ isLoading: false });
+        return {
+          success: false,
+          requiresApproval: false,
+          error: 'Invalid or expired invite link'
+        };
+      }
+
+      // Check if user is already a member
+      if (request.userId && group.members.some(m => m.userId === request.userId)) {
+        set({ isLoading: false });
+        return {
+          success: false,
+          requiresApproval: false,
+          error: 'You are already a member of this group'
+        };
+      }
+
+      // Create invite record for admin approval
+      const newInvite: GroupInvite = {
+        id: `invite_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        groupId: group.id,
+        inviterUserId: group.createdBy,
+        inviterName: group.members.find(m => m.userId === group.createdBy)?.name || 'Admin',
+        inviteeEmail: request.userEmail,
+        inviteeUserId: request.userId,
+        status: InviteStatus.PENDING,
+        message: request.message,
+        createdAt: new Date().toISOString(),
+        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
+      };
+
+      const updatedGroup = {
+        ...group,
+        invites: [...group.invites, newInvite],
+        updatedAt: new Date().toISOString()
+      };
+
+      if (saveGroup(updatedGroup)) {
+        const updatedGroups = groups.map(g => g.id === group.id ? updatedGroup : g);
+        set({
+          groups: updatedGroups,
+          isLoading: false
+        });
+
+        return {
+          success: true,
+          requiresApproval: true,
+          inviteId: newInvite.id,
+          message: 'Join request sent successfully'
+        };
+      } else {
+        set({ isLoading: false });
+        return {
+          success: false,
+          requiresApproval: false,
+          error: 'Failed to send join request'
+        };
+      }
+    } catch (error) {
+      set({ isLoading: false });
+      return {
+        success: false,
+        requiresApproval: false,
+        error: 'An error occurred while processing your request'
+      };
+    }
+  },
+
+  approveInvite: async (groupId: string, inviteId: string) => {
+    const group = getGroup(groupId);
+    if (!group) return false;
+
+    const invite = group.invites.find(i => i.id === inviteId);
+    if (!invite || invite.status !== InviteStatus.PENDING) return false;
+
+    // Add user as member
+    const newMember = {
+      userId: invite.inviteeUserId || `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      name: invite.inviteeEmail?.split('@')[0] || 'New Member',
+      email: invite.inviteeEmail || '',
+      joinedAt: new Date().toISOString(),
+      isActive: true,
+      role: GroupRole.MEMBER
+    };
+
+    const updatedGroup = {
+      ...group,
+      members: [...group.members, newMember],
+      invites: group.invites.map(i =>
+        i.id === inviteId
+          ? { ...i, status: InviteStatus.ACCEPTED, respondedAt: new Date().toISOString() }
+          : i
+      ),
+      updatedAt: new Date().toISOString()
+    };
+
+    if (saveGroup(updatedGroup)) {
+      const groups = get().groups.map(g => g.id === groupId ? updatedGroup : g);
+      set({
+        groups,
+        currentGroup: get().currentGroup?.id === groupId ? updatedGroup : get().currentGroup
+      });
+      return true;
+    }
+
+    return false;
+  },
+
+  declineInvite: async (groupId: string, inviteId: string) => {
+    const group = getGroup(groupId);
+    if (!group) return false;
+
+    const updatedGroup = {
+      ...group,
+      invites: group.invites.map(i =>
+        i.id === inviteId
+          ? { ...i, status: InviteStatus.DECLINED, respondedAt: new Date().toISOString() }
+          : i
+      ),
+      updatedAt: new Date().toISOString()
+    };
+
+    if (saveGroup(updatedGroup)) {
+      const groups = get().groups.map(g => g.id === groupId ? updatedGroup : g);
+      set({
+        groups,
+        currentGroup: get().currentGroup?.id === groupId ? updatedGroup : get().currentGroup
+      });
+      return true;
+    }
+
+    return false;
+  },
+
+  getPendingInvites: (groupId: string) => {
+    const group = getGroup(groupId);
+    if (!group) return [];
+
+    return group.invites.filter(invite =>
+      invite.status === InviteStatus.PENDING &&
+      new Date(invite.expiresAt) > new Date()
+    );
   },
 
   // Utility functions
