@@ -63,10 +63,13 @@ const Button: React.FC<ButtonProps> = ({
 
   const getButtonStyle = () => {
     const baseStyle = {
-      backgroundColor: variant === 'primary' ? 'var(--color-primary)' : 
-                     variant === 'secondary' ? 'var(--color-surface)' :
-                     variant === 'danger' ? 'var(--color-error)' : 'transparent',
-      borderColor: variant === 'secondary' ? 'var(--color-border)' : 'transparent'
+      backgroundColor: variant === 'primary' ? '#14b8a6' :
+                     variant === 'secondary' ? 'white' :
+                     variant === 'danger' ? '#ef4444' : 'transparent',
+      borderColor: variant === 'secondary' ? '#d1d5db' : 'transparent',
+      color: variant === 'primary' ? 'white' :
+             variant === 'secondary' ? '#374151' :
+             variant === 'danger' ? 'white' : '#6b7280'
     };
     return baseStyle;
   };
@@ -78,6 +81,28 @@ const Button: React.FC<ButtonProps> = ({
       disabled={disabled || loading}
       className={classes}
       style={getButtonStyle()}
+      onMouseOver={(e) => {
+        if (!disabled && !loading) {
+          if (variant === 'primary') {
+            e.currentTarget.style.backgroundColor = '#0d9488';
+          } else if (variant === 'secondary') {
+            e.currentTarget.style.backgroundColor = '#f9fafb';
+          } else if (variant === 'danger') {
+            e.currentTarget.style.backgroundColor = '#dc2626';
+          }
+        }
+      }}
+      onMouseOut={(e) => {
+        if (!disabled && !loading) {
+          if (variant === 'primary') {
+            e.currentTarget.style.backgroundColor = '#14b8a6';
+          } else if (variant === 'secondary') {
+            e.currentTarget.style.backgroundColor = 'white';
+          } else if (variant === 'danger') {
+            e.currentTarget.style.backgroundColor = '#ef4444';
+          }
+        }
+      }}
     >
       {loading && (
         <svg

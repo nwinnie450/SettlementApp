@@ -28,17 +28,17 @@ const Input: React.FC<InputProps> = ({
   ].filter(Boolean).join(' ');
 
   const getInputStyle = () => ({
-    backgroundColor: disabled ? 'var(--color-surface)' : 'var(--color-background)',
-    borderColor: error ? 'var(--color-error)' : 'var(--color-border)',
-    color: 'var(--color-text-primary)'
+    backgroundColor: disabled ? '#f3f4f6' : 'white',
+    borderColor: error ? '#ef4444' : '#d1d5db',
+    color: '#1f2937'
   });
 
   return (
     <div className="w-full">
       {label && (
-        <label className="block text-label text-primary mb-2">
+        <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#374151', marginBottom: '6px' }}>
           {label}
-          {required && <span className="text-error ml-1">*</span>}
+          {required && <span style={{ color: '#ef4444', marginLeft: '4px' }}>*</span>}
         </label>
       )}
       <div className="relative">
@@ -52,6 +52,14 @@ const Input: React.FC<InputProps> = ({
           step={step}
           className={`${inputClasses} ${suffix ? 'pr-8' : ''}`}
           style={getInputStyle()}
+          onFocus={(e) => {
+            e.target.style.borderColor = '#14b8a6';
+            e.target.style.boxShadow = '0 0 0 2px rgba(20, 184, 166, 0.2)';
+          }}
+          onBlur={(e) => {
+            e.target.style.borderColor = error ? '#ef4444' : '#d1d5db';
+            e.target.style.boxShadow = 'none';
+          }}
         />
         {suffix && (
           <span className="absolute right-3 top-1/2 -translate-y-1/2 text-secondary text-body-medium">
@@ -60,7 +68,7 @@ const Input: React.FC<InputProps> = ({
         )}
       </div>
       {error && (
-        <p className="mt-1 text-caption text-error">{error}</p>
+        <p style={{ marginTop: '4px', fontSize: '14px', color: '#ef4444' }}>{error}</p>
       )}
     </div>
   );
