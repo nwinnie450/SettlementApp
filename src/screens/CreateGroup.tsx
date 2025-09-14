@@ -267,26 +267,26 @@ const CreateGroup: React.FC = () => {
         <div style={{ maxWidth: '448px', margin: '0 auto' }}>
           <button
             onClick={handleCreateGroup}
-            disabled={isLoading || !userName.trim() || !groupName.trim()}
+            disabled={isLoading || !groupName.trim()}
             style={{
               width: '100%',
               padding: '16px',
-              backgroundColor: (isLoading || !userName.trim() || !groupName.trim()) ? '#d1d5db' : '#14b8a6',
+              backgroundColor: (isLoading || !groupName.trim()) ? '#d1d5db' : '#14b8a6',
               color: 'white',
               border: 'none',
               borderRadius: '8px',
               fontSize: '16px',
               fontWeight: '500',
-              cursor: (isLoading || !userName.trim() || !groupName.trim()) ? 'not-allowed' : 'pointer',
+              cursor: (isLoading || !groupName.trim()) ? 'not-allowed' : 'pointer',
               transition: 'background-color 0.2s'
             }}
             onMouseOver={(e) => {
-              if (!isLoading && userName.trim() && groupName.trim()) {
+              if (!isLoading && groupName.trim()) {
                 (e.target as HTMLElement).style.backgroundColor = '#0d9488';
               }
             }}
             onMouseOut={(e) => {
-              if (!isLoading && userName.trim() && groupName.trim()) {
+              if (!isLoading && groupName.trim()) {
                 (e.target as HTMLElement).style.backgroundColor = '#14b8a6';
               }
             }}
