@@ -232,15 +232,15 @@ const SettlementView: React.FC = () => {
           }
         `}
       </style>
-      <div style={{ minHeight: '100vh', backgroundColor: '#f9fafb' }}>
+      <div style={{ minHeight: '100vh', backgroundColor: 'var(--color-background)' }}>
       {/* Header */}
-      <div style={{ backgroundColor: 'white', padding: '16px', borderBottom: '1px solid #e5e7eb' }}>
+      <div style={{ backgroundColor: 'white', padding: '16px', borderBottom: '1px solid var(--color-border)' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', maxWidth: '448px', margin: '0 auto' }}>
           <div>
-            <h1 style={{ fontSize: '18px', fontWeight: '500', color: '#1f2937', marginBottom: '4px' }}>
+            <h1 style={{ fontSize: '18px', fontWeight: '500', color: 'var(--color-text-primary)', marginBottom: '4px' }}>
               💰 {currentGroup.name}
             </h1>
-            <p style={{ fontSize: '12px', color: '#6b7280' }}>
+            <p style={{ fontSize: '12px', color: 'var(--color-text-secondary)' }}>
               Last calculated: {new Date().toLocaleString()}
             </p>
           </div>
@@ -250,7 +250,7 @@ const SettlementView: React.FC = () => {
               disabled={isCalculatingSettlements}
               style={{
                 padding: '8px 12px',
-                backgroundColor: isCalculatingSettlements ? '#9ca3af' : '#14b8a6',
+                backgroundColor: isCalculatingSettlements ? 'var(--color-text-disabled)' : 'var(--color-primary)',
                 color: 'white',
                 border: 'none',
                 borderRadius: '6px',
@@ -264,6 +264,12 @@ const SettlementView: React.FC = () => {
               onMouseOut={(e) => {
                 if (!isCalculatingSettlements) (e.target as HTMLButtonElement).style.backgroundColor = '#14b8a6';
               }}
+              onMouseOver={(e) => {
+                if (!isCalculatingSettlements) (e.target as HTMLButtonElement).style.backgroundColor = 'var(--color-primary-dark)';
+              }}
+              onMouseOut={(e) => {
+                if (!isCalculatingSettlements) (e.target as HTMLButtonElement).style.backgroundColor = 'var(--color-primary)';
+              }}
             >
               {isCalculatingSettlements ? '⏳ Calculating...' : '🔄 Recalculate'}
             </button>
@@ -273,7 +279,7 @@ const SettlementView: React.FC = () => {
                 onClick={() => setShowSimplified(!showSimplified)}
                 style={{
                   padding: '8px 12px',
-                  backgroundColor: showSimplified ? '#f59e0b' : '#6b7280',
+                  backgroundColor: showSimplified ? 'var(--color-warning)' : 'var(--color-text-secondary)',
                   color: 'white',
                   border: 'none',
                   borderRadius: '6px',
@@ -282,10 +288,10 @@ const SettlementView: React.FC = () => {
                   cursor: 'pointer'
                 }}
                 onMouseOver={(e) => {
-                  (e.target as HTMLButtonElement).style.backgroundColor = showSimplified ? '#d97706' : '#4b5563';
+                  (e.target as HTMLButtonElement).style.opacity = '0.9';
                 }}
                 onMouseOut={(e) => {
-                  (e.target as HTMLButtonElement).style.backgroundColor = showSimplified ? '#f59e0b' : '#6b7280';
+                  (e.target as HTMLButtonElement).style.opacity = '1';
                 }}
               >
                 {showSimplified ? '📋 Multi-Currency' : '🔄 Simplify'}
@@ -382,13 +388,13 @@ const SettlementView: React.FC = () => {
                       <span style={{ 
                         fontSize: '18px',
                         fontWeight: '600',
-                        color: balance.netAmount > 0 ? '#14b8a6' : 
-                               balance.netAmount < 0 ? '#f97316' : '#6b7280'
+                        color: balance.netAmount > 0 ? 'var(--color-success)' : 
+                               balance.netAmount < 0 ? 'var(--color-warning)' : 'var(--color-text-secondary)'
                       }}>
                         {balance.netAmount > 0 ? '+' : balance.netAmount < 0 ? '-' : ''}
                         {formatCurrency(Math.abs(balance.netAmount), balance.currency)}
                       </span>
-                      <p style={{ fontSize: '12px', color: '#6b7280', marginTop: '2px' }}>
+                      <p style={{ fontSize: '12px', color: 'var(--color-text-secondary)', marginTop: '2px' }}>
                         {balance.netAmount > 0 ? 'is owed' : 
                          balance.netAmount < 0 ? 'owes' : 'all settled'}
                       </p>

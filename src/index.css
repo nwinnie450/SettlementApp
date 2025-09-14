@@ -76,6 +76,9 @@
   --transition-fast: 150ms ease-out;
   --transition-normal: 200ms ease-out;
   --transition-slow: 300ms ease-in-out;
+
+  /* Gradients */
+  --gradient-primary: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
 }
 
 /* Dark theme variables */
@@ -205,9 +208,21 @@ body {
 .bg-background { background-color: var(--color-background); }
 .bg-surface { background-color: var(--color-surface); }
 .bg-primary { background-color: var(--color-primary); }
+.bg-primary-light { background-color: var(--color-primary-light); }
+.bg-primary-dark { background-color: var(--color-primary-dark); }
 .bg-success { background-color: var(--color-success); }
 .bg-warning { background-color: var(--color-warning); }
 .bg-error { background-color: var(--color-error); }
+
+/* Border Utilities */
+.border-border { border-color: var(--color-border); }
+
+/* Hover Utilities (limited) */
+.hover\:bg-primary-light:hover { background-color: var(--color-primary-light); }
+.hover\:bg-primary-dark:hover { background-color: var(--color-primary-dark); }
+
+/* Gradient Utilities */
+.bg-gradient-primary { background: var(--gradient-primary); }
 
 /* Layout Utilities */
 .container {

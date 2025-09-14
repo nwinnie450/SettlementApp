@@ -26,7 +26,7 @@ const BottomNavigation: React.FC = () => {
               left: '-2px',
               right: '-2px',
               bottom: '-2px',
-              background: 'linear-gradient(135deg, #14b8a6 0%, #0d9488 100%)',
+              background: 'var(--gradient-primary)',
               borderRadius: '12px',
               opacity: '0.15'
             }} />
@@ -35,7 +35,7 @@ const BottomNavigation: React.FC = () => {
             style={{ 
               width: '24px', 
               height: '24px', 
-              color: isActive ? '#14b8a6' : '#6b7280',
+              color: isActive ? 'var(--color-primary)' : 'var(--color-text-secondary)',
               position: 'relative',
               zIndex: 1
             }}
@@ -65,7 +65,7 @@ const BottomNavigation: React.FC = () => {
               left: '-2px',
               right: '-2px',
               bottom: '-2px',
-              background: 'linear-gradient(135deg, #14b8a6 0%, #0d9488 100%)',
+              background: 'var(--gradient-primary)',
               borderRadius: '12px',
               opacity: '0.15'
             }} />
@@ -74,7 +74,7 @@ const BottomNavigation: React.FC = () => {
             style={{ 
               width: '24px', 
               height: '24px', 
-              color: isActive ? '#14b8a6' : '#6b7280',
+              color: isActive ? 'var(--color-primary)' : 'var(--color-text-secondary)',
               position: 'relative',
               zIndex: 1
             }}
@@ -106,7 +106,7 @@ const BottomNavigation: React.FC = () => {
               left: '-2px',
               right: '-2px',
               bottom: '-2px',
-              background: 'linear-gradient(135deg, #14b8a6 0%, #0d9488 100%)',
+              background: 'var(--gradient-primary)',
               borderRadius: '12px',
               opacity: '0.15'
             }} />
@@ -115,7 +115,7 @@ const BottomNavigation: React.FC = () => {
             style={{ 
               width: '24px', 
               height: '24px', 
-              color: isActive ? '#14b8a6' : '#6b7280',
+              color: isActive ? 'var(--color-primary)' : 'var(--color-text-secondary)',
               position: 'relative',
               zIndex: 1
             }}
@@ -146,7 +146,7 @@ const BottomNavigation: React.FC = () => {
               left: '-2px',
               right: '-2px',
               bottom: '-2px',
-              background: 'linear-gradient(135deg, #14b8a6 0%, #0d9488 100%)',
+              background: 'var(--gradient-primary)',
               borderRadius: '12px',
               opacity: '0.15'
             }} />
@@ -155,7 +155,7 @@ const BottomNavigation: React.FC = () => {
             style={{ 
               width: '24px', 
               height: '24px', 
-              color: isActive ? '#14b8a6' : '#6b7280',
+              color: isActive ? 'var(--color-primary)' : 'var(--color-text-secondary)',
               position: 'relative',
               zIndex: 1
             }}
@@ -191,7 +191,7 @@ const BottomNavigation: React.FC = () => {
               left: '-2px',
               right: '-2px',
               bottom: '-2px',
-              background: 'linear-gradient(135deg, #14b8a6 0%, #0d9488 100%)',
+              background: 'var(--gradient-primary)',
               borderRadius: '12px',
               opacity: '0.15'
             }} />
@@ -200,7 +200,7 @@ const BottomNavigation: React.FC = () => {
             style={{ 
               width: '24px', 
               height: '24px', 
-              color: isActive ? '#14b8a6' : '#6b7280',
+              color: isActive ? 'var(--color-primary)' : 'var(--color-text-secondary)',
               position: 'relative',
               zIndex: 1
             }}
@@ -233,8 +233,8 @@ const BottomNavigation: React.FC = () => {
       bottom: '0',
       left: '0',
       right: '0',
-      backgroundColor: 'white',
-      borderTop: '1px solid #f3f4f6',
+      backgroundColor: 'var(--color-surface)',
+      borderTop: '1px solid var(--color-border)',
       backdropFilter: 'blur(10px)',
       WebkitBackdropFilter: 'blur(10px)',
       boxShadow: '0 -4px 12px rgba(0, 0, 0, 0.05)',
@@ -293,7 +293,7 @@ const BottomNavigation: React.FC = () => {
                 <span style={{
                   fontSize: '11px',
                   marginTop: '4px',
-                  color: active ? '#14b8a6' : '#6b7280',
+                  color: active ? 'var(--color-primary)' : 'var(--color-text-secondary)',
                   fontWeight: active ? '600' : '500',
                   transition: 'all 0.2s ease'
                 }}>

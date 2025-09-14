@@ -267,9 +267,9 @@ const AddExpense: React.FC = () => {
   const equalShare = memberCount > 0 ? amount / memberCount : 0;
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#f9fafb' }}>
+    <div style={{ minHeight: '100vh', backgroundColor: 'var(--color-background)' }}>
       {/* Header */}
-      <div style={{ backgroundColor: 'white', padding: '16px', borderBottom: '1px solid #e5e7eb' }}>
+      <div style={{ backgroundColor: 'white', padding: '16px', borderBottom: '1px solid var(--color-border)' }}>
         <div style={{ display: 'flex', alignItems: 'center', maxWidth: '448px', margin: '0 auto' }}>
           <button
             onClick={() => navigate(-1)}
@@ -284,23 +284,23 @@ const AddExpense: React.FC = () => {
             onMouseOver={(e) => (e.target as HTMLButtonElement).style.backgroundColor = '#f3f4f6'}
             onMouseOut={(e) => (e.target as HTMLButtonElement).style.backgroundColor = 'transparent'}
           >
-            <svg style={{ width: '24px', height: '24px', color: '#6b7280' }} fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
+            <svg style={{ width: '24px', height: '24px', color: 'var(--color-text-secondary)' }} fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
               <path d="M15 18l-6-6 6-6" />
             </svg>
           </button>
-          <h1 style={{ fontSize: '18px', fontWeight: '500', color: '#1f2937', marginLeft: '8px' }}>Add expense</h1>
+          <h1 style={{ fontSize: '18px', fontWeight: '500', color: 'var(--color-text-primary)', marginLeft: '8px' }}>Add expense</h1>
         </div>
       </div>
 
       <form onSubmit={handleSubmit} style={{ paddingBottom: '120px' }}>
         <div style={{ padding: '24px 16px', maxWidth: '448px', margin: '0 auto' }}>
           {/* Basic Details */}
-          <div style={{ backgroundColor: 'white', borderRadius: '8px', padding: '20px', marginBottom: '16px', boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)', border: '1px solid #e5e7eb' }}>
-            <h3 style={{ fontSize: '16px', fontWeight: '500', color: '#1f2937', marginBottom: '16px' }}>Expense details</h3>
+          <div style={{ backgroundColor: 'white', borderRadius: '8px', padding: '20px', marginBottom: '16px', boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)', border: '1px solid var(--color-border)' }}>
+            <h3 style={{ fontSize: '16px', fontWeight: '500', color: 'var(--color-text-primary)', marginBottom: '16px' }}>Expense details</h3>
             
             {/* Photo attachment */}
             <div style={{ marginBottom: '16px' }}>
-              <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#374151', marginBottom: '6px' }}>
+              <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: 'var(--color-text-primary)', marginBottom: '6px' }}>
                 📸 Photo (Optional)
               </label>
               <input
@@ -320,13 +320,13 @@ const AddExpense: React.FC = () => {
                   width: '100%',
                   padding: '12px',
                   fontSize: '14px',
-                  border: '1px solid #d1d5db',
+                  border: '1px solid var(--color-border)',
                   borderRadius: '6px',
                   outline: 'none',
                   backgroundColor: 'white'
                 }}
-                onFocus={(e) => e.target.style.borderColor = '#14b8a6'}
-                onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
+                onFocus={(e) => e.target.style.borderColor = 'var(--color-primary)'}
+                onBlur={(e) => e.target.style.borderColor = 'var(--color-border)'}
               />
               {formData.photo && (
                 <div style={{ marginTop: '8px' }}>
@@ -383,13 +383,13 @@ const AddExpense: React.FC = () => {
                 onBlur={(e) => e.target.style.borderColor = errors.description ? '#ef4444' : '#d1d5db'}
               />
               {errors.description && (
-                <p style={{ color: '#ef4444', fontSize: '14px', marginTop: '4px' }}>{errors.description}</p>
+                <p style={{ color: 'var(--color-error)', fontSize: '14px', marginTop: '4px' }}>{errors.description}</p>
               )}
             </div>
             
             {/* Category selection */}
             <div style={{ marginBottom: '16px' }}>
-              <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#374151', marginBottom: '6px' }}>Category</label>
+              <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: 'var(--color-text-primary)', marginBottom: '6px' }}>Category</label>
               <select
                 value={formData.category}
                 onChange={(e) => setFormData({ ...formData, category: e.target.value })}
@@ -397,14 +397,14 @@ const AddExpense: React.FC = () => {
                   width: '100%',
                   padding: '12px',
                   fontSize: '16px',
-                  border: '1px solid #d1d5db',
+                  border: '1px solid var(--color-border)',
                   borderRadius: '6px',
                   outline: 'none',
                   backgroundColor: 'white',
-                  color: '#1f2937'
+                  color: 'var(--color-text-primary)'
                 }}
-                onFocus={(e) => e.target.style.borderColor = '#14b8a6'}
-                onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
+                onFocus={(e) => e.target.style.borderColor = 'var(--color-primary)'}
+                onBlur={(e) => e.target.style.borderColor = 'var(--color-border)'}
               >
                 {categories.map(category => (
                   <option key={category.value} value={category.value}>
@@ -416,7 +416,7 @@ const AddExpense: React.FC = () => {
             
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
               <div>
-                <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#374151', marginBottom: '6px' }}>
+                <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: 'var(--color-text-primary)', marginBottom: '6px' }}>
                   Amount {errors.amount && <span style={{ color: '#ef4444' }}>*</span>}
                 </label>
                 <input
@@ -429,21 +429,21 @@ const AddExpense: React.FC = () => {
                     width: '100%',
                     padding: '12px',
                     fontSize: '16px',
-                    border: errors.amount ? '1px solid #ef4444' : '1px solid #d1d5db',
+                  border: errors.amount ? '1px solid var(--color-error)' : '1px solid var(--color-border)',
                     borderRadius: '6px',
                     outline: 'none',
                     backgroundColor: 'white'
                   }}
-                  onFocus={(e) => e.target.style.borderColor = '#14b8a6'}
-                  onBlur={(e) => e.target.style.borderColor = errors.amount ? '#ef4444' : '#d1d5db'}
+                onFocus={(e) => e.target.style.borderColor = 'var(--color-primary)'}
+                onBlur={(e) => e.target.style.borderColor = errors.amount ? 'var(--color-error)' : 'var(--color-border)'}
                 />
                 {errors.amount && (
-                  <p style={{ color: '#ef4444', fontSize: '14px', marginTop: '4px' }}>{errors.amount}</p>
+                <p style={{ color: 'var(--color-error)', fontSize: '14px', marginTop: '4px' }}>{errors.amount}</p>
                 )}
               </div>
               
               <div>
-                <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#374151', marginBottom: '6px' }}>Currency</label>
+                <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: 'var(--color-text-primary)', marginBottom: '6px' }}>Currency</label>
                 <select
                   value={formData.currency}
                   onChange={(e) => setFormData({ ...formData, currency: e.target.value })}
@@ -451,14 +451,14 @@ const AddExpense: React.FC = () => {
                     width: '100%',
                     padding: '12px',
                     fontSize: '16px',
-                    border: '1px solid #d1d5db',
+                    border: '1px solid var(--color-border)',
                     borderRadius: '6px',
                     outline: 'none',
                     backgroundColor: 'white',
-                    color: '#1f2937'
+                    color: 'var(--color-text-primary)'
                   }}
-                  onFocus={(e) => e.target.style.borderColor = '#14b8a6'}
-                  onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
+                  onFocus={(e) => e.target.style.borderColor = 'var(--color-primary)'}
+                  onBlur={(e) => e.target.style.borderColor = 'var(--color-border)'}
                 >
                   <option value="SGD">SGD</option>
                   <option value="MYR">MYR</option>
@@ -473,13 +473,13 @@ const AddExpense: React.FC = () => {
           </div>
 
           {/* Who paid */}
-          <div style={{ backgroundColor: 'white', borderRadius: '8px', padding: '20px', marginBottom: '16px', boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)', border: '1px solid #e5e7eb' }}>
+          <div style={{ backgroundColor: 'white', borderRadius: '8px', padding: '20px', marginBottom: '16px', boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)', border: '1px solid var(--color-border)' }}>
             <h3 style={{ fontSize: '16px', fontWeight: '500', color: '#1f2937', marginBottom: '16px' }}>
               Who paid? {errors.paidBy && <span style={{ color: '#ef4444' }}>*</span>}
             </h3>
             
             {errors.paidBy && (
-              <p style={{ color: '#ef4444', fontSize: '14px', marginBottom: '12px' }}>{errors.paidBy}</p>
+              <p style={{ color: 'var(--color-error)', fontSize: '14px', marginBottom: '12px' }}>{errors.paidBy}</p>
             )}
             
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
@@ -526,12 +526,12 @@ const AddExpense: React.FC = () => {
                   </div>
                   <span style={{ 
                     fontSize: '16px', 
-                    color: '#1f2937',
+                    color: 'var(--color-text-primary)',
                     fontWeight: formData.paidBy === member.userId ? '500' : '400'
                   }}>
                     {member.name} 
                     {member.userId === currentUser.id && (
-                      <span style={{ color: '#6b7280', marginLeft: '4px' }}>(you)</span>
+                      <span style={{ color: 'var(--color-text-secondary)', marginLeft: '4px' }}>(you)</span>
                     )}
                   </span>
                 </label>
@@ -540,7 +540,7 @@ const AddExpense: React.FC = () => {
           </div>
 
           {/* Split between */}
-          <div style={{ backgroundColor: 'white', borderRadius: '8px', padding: '20px', marginBottom: '16px', boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)', border: '1px solid #e5e7eb' }}>
+          <div style={{ backgroundColor: 'white', borderRadius: '8px', padding: '20px', marginBottom: '16px', boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)', border: '1px solid var(--color-border)' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
               <h3 style={{ fontSize: '16px', fontWeight: '500', color: '#1f2937' }}>Split between</h3>
               <button
@@ -548,7 +548,7 @@ const AddExpense: React.FC = () => {
                 onClick={() => setShowManageMembers(true)}
                 style={{
                   padding: '8px 12px',
-                  backgroundColor: '#14b8a6',
+                  backgroundColor: 'var(--color-primary)',
                   color: 'white',
                   border: 'none',
                   borderRadius: '6px',
@@ -559,19 +559,19 @@ const AddExpense: React.FC = () => {
                   alignItems: 'center',
                   gap: '6px'
                 }}
-                onMouseOver={(e) => (e.target as HTMLButtonElement).style.backgroundColor = '#0d9488'}
-                onMouseOut={(e) => (e.target as HTMLButtonElement).style.backgroundColor = '#14b8a6'}
+                onMouseOver={(e) => (e.target as HTMLButtonElement).style.backgroundColor = 'var(--color-primary-dark)'}
+                onMouseOut={(e) => (e.target as HTMLButtonElement).style.backgroundColor = 'var(--color-primary)'}
               >
                 👥 Manage Members
               </button>
             </div>
             
             {errors.members && (
-              <p style={{ color: '#ef4444', fontSize: '14px', marginBottom: '12px' }}>{errors.members}</p>
+              <p style={{ color: 'var(--color-error)', fontSize: '14px', marginBottom: '12px' }}>{errors.members}</p>
             )}
             
             {errors.removeMember && (
-              <p style={{ color: '#ef4444', fontSize: '14px', marginBottom: '12px' }}>{errors.removeMember}</p>
+              <p style={{ color: 'var(--color-error)', fontSize: '14px', marginBottom: '12px' }}>{errors.removeMember}</p>
             )}
             
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
@@ -580,7 +580,7 @@ const AddExpense: React.FC = () => {
                   display: 'flex', 
                   alignItems: 'center',
                   padding: '8px',
-                  border: '1px solid #e5e7eb',
+                  border: '1px solid var(--color-border)',
                   borderRadius: '6px',
                   backgroundColor: '#fafafa'
                 }}>
@@ -592,7 +592,7 @@ const AddExpense: React.FC = () => {
                     style={{
                       width: '16px',
                       height: '16px',
-                      accentColor: '#14b8a6',
+                      accentColor: 'var(--color-primary)',
                       cursor: 'pointer'
                     }}
                   />
@@ -668,8 +668,8 @@ const AddExpense: React.FC = () => {
                           style={{
                             padding: '4px 6px',
                             backgroundColor: 'transparent',
-                            color: '#6b7280',
-                            border: '1px solid #d1d5db',
+                            color: 'var(--color-text-secondary)',
+                            border: '1px solid var(--color-border)',
                             borderRadius: '4px',
                             cursor: 'pointer',
                             fontSize: '10px'
@@ -685,7 +685,7 @@ const AddExpense: React.FC = () => {
                             style={{
                               padding: '4px 6px',
                               backgroundColor: 'transparent',
-                              color: '#ef4444',
+                              color: 'var(--color-error)',
                               border: '1px solid #fecaca',
                               borderRadius: '4px',
                               cursor: 'pointer',
@@ -713,9 +713,9 @@ const AddExpense: React.FC = () => {
             <div style={{ backgroundColor: 'white', borderRadius: '8px', padding: '20px', marginBottom: '16px', boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)', border: '1px solid #e5e7eb' }}>
               <h3 style={{ fontSize: '16px', fontWeight: '500', color: '#1f2937', marginBottom: '16px' }}>Split equally</h3>
               
-              <div style={{ backgroundColor: '#f9fafb', padding: '12px', borderRadius: '8px' }}>
-                <p style={{ fontSize: '14px', color: '#6b7280', marginBottom: '4px' }}>Each person owes</p>
-                <p style={{ fontSize: '18px', fontWeight: '500', color: '#1f2937' }}>
+              <div style={{ backgroundColor: 'var(--color-surface)', padding: '12px', borderRadius: '8px' }}>
+                <p style={{ fontSize: '14px', color: 'var(--color-text-secondary)', marginBottom: '4px' }}>Each person owes</p>
+                <p style={{ fontSize: '18px', fontWeight: '500', color: 'var(--color-text-primary)' }}>
                   {(amount / memberCount || 0).toFixed(2)} {formData.currency}
                 </p>
               </div>
@@ -725,7 +725,7 @@ const AddExpense: React.FC = () => {
           {/* Error Display */}
           {errors.submit && (
             <div style={{ padding: '16px', borderRadius: '8px', backgroundColor: '#fef2f2', border: '1px solid #fecaca', marginBottom: '16px' }}>
-              <p style={{ color: '#dc2626', fontSize: '14px' }}>{errors.submit}</p>
+              <p style={{ color: 'var(--color-error)', fontSize: '14px' }}>{errors.submit}</p>
             </div>
           )}
 
@@ -738,7 +738,7 @@ const AddExpense: React.FC = () => {
               style={{
                 width: '100%',
                 padding: '16px',
-                backgroundColor: (isSubmitting || selectedMembers.size === 0 || !formData.description.trim() || !formData.amount || !formData.paidBy) ? '#9ca3af' : '#14b8a6',
+                backgroundColor: (isSubmitting || selectedMembers.size === 0 || !formData.description.trim() || !formData.amount || !formData.paidBy) ? 'var(--color-text-disabled)' : 'var(--color-primary)',
                 color: 'white',
                 border: 'none',
                 borderRadius: '8px',
@@ -755,7 +755,7 @@ const AddExpense: React.FC = () => {
             <div style={{ 
               textAlign: 'center', 
               fontSize: '14px', 
-              color: '#6b7280',
+              color: 'var(--color-text-secondary)',
               marginTop: '8px'
             }}>
               {!formData.description.trim() && <p>❌ Missing: Description</p>}
@@ -763,7 +763,7 @@ const AddExpense: React.FC = () => {
               {!formData.paidBy && <p>❌ Missing: Who paid</p>}
               {selectedMembers.size === 0 && <p>❌ Missing: Select members to split with</p>}
               {formData.description.trim() && formData.amount && formData.paidBy && selectedMembers.size > 0 && (
-                <p style={{ color: '#14b8a6' }}>✅ Ready to save!</p>
+                <p style={{ color: 'var(--color-primary)' }}>✅ Ready to save!</p>
               )}
             </div>
           </div>
@@ -792,7 +792,7 @@ const AddExpense: React.FC = () => {
         left: '0', 
         right: '0', 
         backgroundColor: 'white', 
-        borderTop: '2px solid #e5e7eb', 
+        borderTop: '2px solid var(--color-border)', 
         padding: '20px 16px',
         boxShadow: '0 -4px 6px -1px rgba(0, 0, 0, 0.1)',
         zIndex: 1000
@@ -818,7 +818,7 @@ const AddExpense: React.FC = () => {
             style={{
               width: '100%',
               padding: '18px',
-              backgroundColor: (isSubmitting || selectedMembers.size === 0 || !formData.description.trim() || !formData.amount || !formData.paidBy) ? '#9ca3af' : '#14b8a6',
+              backgroundColor: (isSubmitting || selectedMembers.size === 0 || !formData.description.trim() || !formData.amount || !formData.paidBy) ? 'var(--color-text-disabled)' : 'var(--color-primary)',
               color: 'white',
               border: 'none',
               borderRadius: '12px',
@@ -832,13 +832,13 @@ const AddExpense: React.FC = () => {
             }}
             onMouseOver={(e) => {
               if (!isSubmitting && selectedMembers.size > 0 && formData.description.trim() && formData.amount && formData.paidBy) {
-                e.currentTarget.style.backgroundColor = '#0d9488';
+                e.currentTarget.style.backgroundColor = 'var(--color-primary-dark)';
                 e.currentTarget.style.transform = 'translateY(-1px)';
               }
             }}
             onMouseOut={(e) => {
               if (!isSubmitting && selectedMembers.size > 0 && formData.description.trim() && formData.amount && formData.paidBy) {
-                e.currentTarget.style.backgroundColor = '#14b8a6';
+                e.currentTarget.style.backgroundColor = 'var(--color-primary)';
                 e.currentTarget.style.transform = 'translateY(0)';
               }
             }}

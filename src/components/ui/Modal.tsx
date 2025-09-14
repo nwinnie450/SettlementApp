@@ -80,12 +80,12 @@ const Modal: React.FC<ModalProps> = ({
             alignItems: 'center', 
             justifyContent: 'space-between', 
             padding: '16px', 
-            borderBottom: '1px solid #e5e7eb' 
+            borderBottom: '1px solid var(--color-border)' 
           }}>
             <h2 style={{ 
               fontSize: '20px', 
               fontWeight: '600', 
-              color: '#1f2937', 
+              color: 'var(--color-text-primary)', 
               margin: 0 
             }}>
               {title}
@@ -102,11 +102,11 @@ const Modal: React.FC<ModalProps> = ({
                 alignItems: 'center',
                 justifyContent: 'center'
               }}
-              onMouseOver={(e) => e.target.style.backgroundColor = '#f3f4f6'}
+              onMouseOver={(e) => e.target.style.backgroundColor = 'var(--color-surface)'}
               onMouseOut={(e) => e.target.style.backgroundColor = 'transparent'}
             >
               <svg
-                style={{ width: '24px', height: '24px', color: '#6b7280' }}
+                style={{ width: '24px', height: '24px', color: 'var(--color-text-secondary)' }}
                 fill="none"
                 strokeLinecap="round"
                 strokeLinejoin="round"

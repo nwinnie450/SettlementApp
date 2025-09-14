@@ -105,18 +105,24 @@ const JoinGroupScreen: React.FC = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-white flex flex-col justify-center px-8">
-        <div className="text-center">
-          <div className="w-16 h-16 mx-auto mb-4 bg-red-100 rounded-full flex items-center justify-center">
-            <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
+      <div style={{ minHeight: '100vh', backgroundColor: '#f9fafb' }}>
+        <div style={{ backgroundColor: 'white', padding: '16px', borderBottom: '1px solid #e5e7eb' }}>
+          <div style={{ display: 'flex', alignItems: 'center', maxWidth: '448px', margin: '0 auto' }}>
+            <h1 style={{ fontSize: '18px', fontWeight: '500', color: '#1f2937' }}>Invite Error</h1>
           </div>
-          <h1 className="text-2xl font-light text-gray-900 mb-2">Invite Error</h1>
-          <p className="text-gray-600 mb-6">{error}</p>
-          <Button onClick={() => navigate('/groups')} variant="secondary">
-            Go to My Groups
-          </Button>
+        </div>
+        <div style={{ padding: '24px 16px', maxWidth: '448px', margin: '0 auto' }}>
+          <div style={{ backgroundColor: 'white', borderRadius: '8px', padding: '20px', textAlign: 'center', boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)', border: '1px solid #e5e7eb' }}>
+            <div style={{ width: '64px', height: '64px', margin: '0 auto 16px', backgroundColor: '#fef2f2', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <svg style={{ width: '32px', height: '32px', color: '#dc2626' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <p style={{ color: '#6b7280', marginBottom: '24px' }}>{error}</p>
+            <Button onClick={() => navigate('/groups')} variant="secondary">
+              Go to My Groups
+            </Button>
+          </div>
         </div>
       </div>
     );
@@ -124,18 +130,24 @@ const JoinGroupScreen: React.FC = () => {
 
   if (success) {
     return (
-      <div className="min-h-screen bg-white flex flex-col justify-center px-8">
-        <div className="text-center">
-          <div className="w-16 h-16 mx-auto mb-4 bg-green-100 rounded-full flex items-center justify-center">
-            <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-            </svg>
+      <div style={{ minHeight: '100vh', backgroundColor: '#f9fafb' }}>
+        <div style={{ backgroundColor: 'white', padding: '16px', borderBottom: '1px solid #e5e7eb' }}>
+          <div style={{ display: 'flex', alignItems: 'center', maxWidth: '448px', margin: '0 auto' }}>
+            <h1 style={{ fontSize: '18px', fontWeight: '500', color: '#1f2937' }}>Success!</h1>
           </div>
-          <h1 className="text-2xl font-light text-gray-900 mb-2">Success!</h1>
-          <p className="text-gray-600 mb-6">{success}</p>
-          <Button onClick={() => navigate('/groups')}>
-            Go to My Groups
-          </Button>
+        </div>
+        <div style={{ padding: '24px 16px', maxWidth: '448px', margin: '0 auto' }}>
+          <div style={{ backgroundColor: 'white', borderRadius: '8px', padding: '20px', textAlign: 'center', boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)', border: '1px solid #e5e7eb' }}>
+            <div style={{ width: '64px', height: '64px', margin: '0 auto 16px', backgroundColor: '#dcfce7', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <svg style={{ width: '32px', height: '32px', color: '#16a34a' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <p style={{ color: '#6b7280', marginBottom: '24px' }}>{success}</p>
+            <Button onClick={() => navigate('/groups')}>
+              Go to My Groups
+            </Button>
+          </div>
         </div>
       </div>
     );
@@ -143,85 +155,121 @@ const JoinGroupScreen: React.FC = () => {
 
   if (!inviteInfo) {
     return (
-      <div className="min-h-screen bg-white flex flex-col justify-center px-8">
-        <div className="text-center">
-          <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center animate-spin">
-            <svg className="w-8 h-8 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-            </svg>
+      <div style={{ minHeight: '100vh', backgroundColor: '#f9fafb' }}>
+        <div style={{ backgroundColor: 'white', padding: '16px', borderBottom: '1px solid #e5e7eb' }}>
+          <div style={{ display: 'flex', alignItems: 'center', maxWidth: '448px', margin: '0 auto' }}>
+            <h1 style={{ fontSize: '18px', fontWeight: '500', color: '#1f2937' }}>Loading...</h1>
           </div>
-          <p className="text-gray-600">Loading invite information...</p>
+        </div>
+        <div style={{ padding: '24px 16px', maxWidth: '448px', margin: '0 auto' }}>
+          <div style={{ backgroundColor: 'white', borderRadius: '8px', padding: '20px', textAlign: 'center', boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)', border: '1px solid #e5e7eb' }}>
+            <div style={{ width: '64px', height: '64px', margin: '0 auto 16px', backgroundColor: '#f3f4f6', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <svg style={{ width: '32px', height: '32px', color: '#6b7280', animation: 'spin 1s linear infinite' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+            </div>
+            <p style={{ color: '#6b7280' }}>Loading invite information...</p>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-white flex flex-col justify-center px-8">
-      <div className="text-center mb-8">
-        <div className="w-16 h-16 mx-auto mb-4 bg-teal-100 rounded-full flex items-center justify-center">
-          <svg className="w-8 h-8 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-          </svg>
+    <div style={{ minHeight: '100vh', backgroundColor: '#f9fafb' }}>
+      {/* Header */}
+      <div style={{ backgroundColor: 'white', padding: '16px', borderBottom: '1px solid #e5e7eb' }}>
+        <div style={{ display: 'flex', alignItems: 'center', maxWidth: '448px', margin: '0 auto' }}>
+          <h1 style={{ fontSize: '18px', fontWeight: '500', color: '#1f2937' }}>Join Group</h1>
         </div>
-        <h1 className="text-2xl font-light text-gray-900 mb-2">Join Group</h1>
-        <p className="text-gray-600">You've been invited to join a group</p>
       </div>
 
-      <div className="bg-gray-50 rounded-lg p-6 mb-6">
-        <div className="text-center">
-          <h2 className="text-lg font-medium text-gray-900 mb-2">{inviteInfo.groupName}</h2>
-          <p className="text-sm text-gray-600 mb-4">
-            Invited by {inviteInfo.inviterName}
-          </p>
-
-          <div className="flex items-center justify-center text-xs text-gray-500">
-            <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            Expires {new Date(inviteInfo.expiresAt).toLocaleDateString()}
+      {/* Content */}
+      <div style={{ padding: '24px 16px', maxWidth: '448px', margin: '0 auto' }}>
+        {/* Welcome section */}
+        <div style={{ backgroundColor: 'white', borderRadius: '8px', padding: '20px', marginBottom: '16px', boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)', border: '1px solid #e5e7eb' }}>
+          <div style={{ textAlign: 'center', marginBottom: '8px' }}>
+            <div style={{
+              width: '32px',
+              height: '32px',
+              margin: '0 auto 12px',
+              borderRadius: '50%',
+              backgroundColor: '#14b8a6',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}>
+              <svg style={{ width: '16px', height: '16px', color: 'white' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+              </svg>
+            </div>
+            <p style={{ color: '#6b7280', fontSize: '14px', margin: 0 }}>You've been invited to join a group</p>
           </div>
         </div>
-      </div>
 
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-        <div className="flex items-start">
-          <svg className="w-5 h-5 text-blue-600 mr-2 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          <div className="text-sm">
-            <p className="text-blue-800 font-medium mb-1">What happens next?</p>
-            <p className="text-blue-700">
-              Your join request will be sent to the group admin for approval.
-              You'll be notified once they review your request.
+        {/* Group Info */}
+        <div style={{ backgroundColor: 'white', borderRadius: '8px', padding: '20px', marginBottom: '16px', boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)', border: '1px solid #e5e7eb' }}>
+          <div style={{ textAlign: 'center' }}>
+            <h2 style={{ fontSize: '18px', fontWeight: '500', color: '#1f2937', marginBottom: '8px' }}>{inviteInfo.groupName}</h2>
+            <p style={{ fontSize: '14px', color: '#6b7280', marginBottom: '16px' }}>
+              Invited by {inviteInfo.inviterName}
+            </p>
+
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', color: '#6b7280' }}>
+              <svg style={{ width: '16px', height: '16px', marginRight: '4px' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              Expires {new Date(inviteInfo.expiresAt).toLocaleDateString()}
+            </div>
+          </div>
+        </div>
+
+        {/* Info section */}
+        <div style={{ backgroundColor: 'white', borderRadius: '8px', padding: '20px', marginBottom: '16px', boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)', border: '1px solid #e5e7eb' }}>
+          <div style={{ display: 'flex', alignItems: 'flex-start' }}>
+            <svg style={{ width: '20px', height: '20px', color: '#14b8a6', marginRight: '8px', marginTop: '2px', flexShrink: 0 }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <div style={{ fontSize: '14px' }}>
+              <p style={{ color: '#1f2937', fontWeight: '500', marginBottom: '4px' }}>What happens next?</p>
+              <p style={{ color: '#6b7280', margin: 0 }}>
+                Your join request will be sent to the group admin for approval.
+                You'll be notified once they review your request.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Buttons */}
+        <div style={{ backgroundColor: 'white', borderRadius: '8px', padding: '20px', marginBottom: '16px', boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)', border: '1px solid #e5e7eb' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <Button
+              onClick={handleJoinGroup}
+              fullWidth
+              loading={isJoining}
+              disabled={isJoining}
+            >
+              {isJoining ? 'Sending Request...' : 'Request to Join Group'}
+            </Button>
+
+            <Button
+              onClick={() => navigate('/groups')}
+              variant="secondary"
+              fullWidth
+            >
+              Maybe Later
+            </Button>
+          </div>
+        </div>
+
+        {/* User info */}
+        <div style={{ backgroundColor: 'white', borderRadius: '8px', padding: '20px', boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)', border: '1px solid #e5e7eb' }}>
+          <div style={{ textAlign: 'center' }}>
+            <p style={{ fontSize: '12px', color: '#6b7280', margin: 0 }}>
+              Signed in as {user?.name} ({user?.email})
             </p>
           </div>
         </div>
-      </div>
-
-      <div className="space-y-3">
-        <Button
-          onClick={handleJoinGroup}
-          fullWidth
-          loading={isJoining}
-          disabled={isJoining}
-        >
-          {isJoining ? 'Sending Request...' : 'Request to Join Group'}
-        </Button>
-
-        <Button
-          onClick={() => navigate('/groups')}
-          variant="secondary"
-          fullWidth
-        >
-          Maybe Later
-        </Button>
-      </div>
-
-      <div className="mt-8 text-center">
-        <p className="text-xs text-gray-500">
-          Signed in as {user?.name} ({user?.email})
-        </p>
       </div>
     </div>
   );

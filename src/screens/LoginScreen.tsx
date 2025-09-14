@@ -74,94 +74,133 @@ const LoginScreen: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white flex flex-col justify-center px-8">
+    <div style={{ minHeight: '100vh', backgroundColor: '#f9fafb' }}>
       {/* Header */}
-      <div className="text-center mb-8">
-        <div className="w-8 h-8 mx-auto mb-3 bg-teal-500 rounded-full flex items-center justify-center">
-          <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-            <path fillRule="evenodd" d="M4 4a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2H4zm3 2h2v4H7V6zm2 6H7v2h2v-2zm2-6h2v2h-2V6zm2 4h-2v2h2v-2zm2-4h2v2h-2V6zm0 4h2v2h-2v-2z" clipRule="evenodd" />
-          </svg>
-        </div>
-        <h1 className="text-2xl font-light text-gray-900 mb-2">Welcome back</h1>
-        <p className="text-gray-600">Sign in to your GroupSettle account</p>
-
-        {inviteCode && (
-          <div className="mt-4 p-3 bg-teal-50 rounded-lg border border-teal-200">
-            <p className="text-sm text-teal-700">
-              You've been invited to join a group! Sign in to continue.
-            </p>
-          </div>
-        )}
-      </div>
-
-      {/* Form */}
-      <form onSubmit={handleSubmit} className="space-y-4">
-        {error && (
-          <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
-            <p className="text-sm text-red-600">{error}</p>
-          </div>
-        )}
-
-        <Input
-          type="email"
-          label="Email"
-          value={formData.email}
-          onChange={handleInputChange('email')}
-          error={formErrors.email}
-          placeholder="your@email.com"
-          required
-          autoComplete="email"
-        />
-
-        <Input
-          type="password"
-          label="Password"
-          value={formData.password}
-          onChange={handleInputChange('password')}
-          error={formErrors.password}
-          placeholder="Enter your password"
-          required
-          autoComplete="current-password"
-        />
-
-        <Button
-          type="submit"
-          fullWidth
-          loading={isLoading}
-          disabled={isLoading}
-        >
-          Sign In
-        </Button>
-      </form>
-
-      {/* Links */}
-      <div className="mt-6 text-center space-y-4">
-        <Link
-          to="/forgot-password"
-          className="block text-sm text-teal-600 hover:text-teal-700"
-        >
-          Forgot your password?
-        </Link>
-
-        <div className="text-sm text-gray-600">
-          Don't have an account?{' '}
-          <Link
-            to={inviteCode ? `/register?invite=${inviteCode}` : '/register'}
-            className="text-teal-600 hover:text-teal-700 font-medium"
+      <div style={{ backgroundColor: 'white', padding: '16px', borderBottom: '1px solid #e5e7eb' }}>
+        <div style={{ display: 'flex', alignItems: 'center', maxWidth: '448px', margin: '0 auto' }}>
+          <button
+            onClick={() => navigate('/onboarding')}
+            style={{
+              padding: '8px',
+              marginLeft: '-8px',
+              borderRadius: '6px',
+              backgroundColor: 'transparent',
+              border: 'none',
+              cursor: 'pointer'
+            }}
+            onMouseOver={(e) => (e.target as HTMLElement).style.backgroundColor = '#f3f4f6'}
+            onMouseOut={(e) => (e.target as HTMLElement).style.backgroundColor = 'transparent'}
           >
-            Sign up
-          </Link>
+            <svg style={{ width: '24px', height: '24px', color: '#6b7280' }} fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
+              <path d="M15 18l-6-6 6-6" />
+            </svg>
+          </button>
+          <h1 style={{ fontSize: '18px', fontWeight: '500', color: '#1f2937', marginLeft: '8px' }}>Welcome back</h1>
         </div>
       </div>
 
-      {/* Back to home */}
-      <div className="mt-8 text-center">
-        <Link
-          to="/"
-          className="text-sm text-gray-500 hover:text-gray-700"
-        >
-          ← Back to home
-        </Link>
+      {/* Content */}
+      <div style={{ padding: '24px 16px', maxWidth: '448px', margin: '0 auto' }}>
+        {/* Welcome section */}
+        <div style={{ backgroundColor: 'white', borderRadius: '8px', padding: '20px', marginBottom: '16px', boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)', border: '1px solid #e5e7eb' }}>
+          <div style={{ textAlign: 'center', marginBottom: '8px' }}>
+            <div style={{
+              width: '32px',
+              height: '32px',
+              margin: '0 auto 12px',
+              borderRadius: '50%',
+              backgroundColor: '#14b8a6',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}>
+              <svg style={{ width: '16px', height: '16px', color: 'white' }} fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M4 4a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2H4zm3 2h2v4H7V6zm2 6H7v2h2v-2zm2-6h2v2h-2V6zm2 4h-2v2h2v-2zm2-4h2v2h-2V6zm0 4h2v2h-2v-2z" clipRule="evenodd" />
+              </svg>
+            </div>
+            <p style={{ color: '#6b7280', fontSize: '14px', margin: 0 }}>Sign in to your GroupSettle account</p>
+          </div>
+
+          {inviteCode && (
+            <div style={{ marginTop: '16px', padding: '12px', backgroundColor: '#ccfbf1', borderRadius: '6px', border: '1px solid #5eead4' }}>
+              <p style={{ color: '#0f766e', fontSize: '14px', margin: 0 }}>
+                You've been invited to join a group! Sign in to continue.
+              </p>
+            </div>
+          )}
+        </div>
+
+        {/* Form */}
+        <div style={{ backgroundColor: 'white', borderRadius: '8px', padding: '20px', marginBottom: '16px', boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)', border: '1px solid #e5e7eb' }}>
+          <form onSubmit={handleSubmit}>
+            {error && (
+              <div style={{ padding: '12px', backgroundColor: '#fef2f2', borderRadius: '6px', border: '1px solid #fecaca', marginBottom: '16px' }}>
+                <p style={{ color: '#dc2626', fontSize: '14px', margin: 0 }}>{error}</p>
+              </div>
+            )}
+
+            <div style={{ marginBottom: '16px' }}>
+              <Input
+                type="email"
+                label="Email"
+                value={formData.email}
+                onChange={handleInputChange('email')}
+                error={formErrors.email}
+                placeholder="your@email.com"
+                required
+                autoComplete="email"
+              />
+            </div>
+
+            <div style={{ marginBottom: '20px' }}>
+              <Input
+                type="password"
+                label="Password"
+                value={formData.password}
+                onChange={handleInputChange('password')}
+                error={formErrors.password}
+                placeholder="Enter your password"
+                required
+                autoComplete="current-password"
+              />
+            </div>
+
+            <Button
+              type="submit"
+              fullWidth
+              loading={isLoading}
+              disabled={isLoading}
+            >
+              Sign In
+            </Button>
+          </form>
+        </div>
+
+        {/* Links */}
+        <div style={{ backgroundColor: 'white', borderRadius: '8px', padding: '20px', boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)', border: '1px solid #e5e7eb' }}>
+          <div style={{ textAlign: 'center' }}>
+            <Link
+              to="/forgot-password"
+              style={{ display: 'block', fontSize: '14px', color: '#14b8a6', textDecoration: 'none', marginBottom: '16px' }}
+              onMouseOver={(e) => e.target.style.color = '#0d9488'}
+              onMouseOut={(e) => e.target.style.color = '#14b8a6'}
+            >
+              Forgot your password?
+            </Link>
+
+            <div style={{ fontSize: '14px', color: '#6b7280' }}>
+              Don't have an account?{' '}
+              <Link
+                to={inviteCode ? `/register?invite=${inviteCode}` : '/register'}
+                style={{ color: '#14b8a6', textDecoration: 'none', fontWeight: '500' }}
+                onMouseOver={(e) => e.target.style.color = '#0d9488'}
+                onMouseOut={(e) => e.target.style.color = '#14b8a6'}
+              >
+                Sign up
+              </Link>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

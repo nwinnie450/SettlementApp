@@ -45,11 +45,11 @@ const Settings: React.FC = () => {
   };
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#f9fafb' }}>
+    <div style={{ minHeight: '100vh', backgroundColor: 'var(--color-background)' }}>
       {/* Header */}
-      <div style={{ backgroundColor: 'white', padding: '16px', borderBottom: '1px solid #e5e7eb' }}>
+      <div style={{ backgroundColor: 'white', padding: '16px', borderBottom: '1px solid var(--color-border)' }}>
         <div style={{ maxWidth: '448px', margin: '0 auto' }}>
-          <h1 style={{ fontSize: '18px', fontWeight: '500', color: '#1f2937' }}>
+          <h1 style={{ fontSize: '18px', fontWeight: '500', color: 'var(--color-text-primary)' }}>
             ⚙️ Settings
           </h1>
         </div>
@@ -62,9 +62,9 @@ const Settings: React.FC = () => {
           borderRadius: '8px',
           padding: '20px',
           marginBottom: '16px',
-          border: '1px solid #e5e7eb'
+          border: '1px solid var(--color-border)'
         }}>
-          <h3 style={{ fontSize: '16px', fontWeight: '500', color: '#1f2937', marginBottom: '16px' }}>
+          <h3 style={{ fontSize: '16px', fontWeight: '500', color: 'var(--color-text-primary)', marginBottom: '16px' }}>
             👤 Profile
           </h3>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -72,7 +72,7 @@ const Settings: React.FC = () => {
               width: '48px',
               height: '48px',
               borderRadius: '50%',
-              backgroundColor: '#14b8a6',
+              backgroundColor: 'var(--color-primary)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -83,10 +83,10 @@ const Settings: React.FC = () => {
               {currentUser?.name?.charAt(0).toUpperCase() || 'U'}
             </div>
             <div>
-              <p style={{ fontSize: '16px', fontWeight: '500', color: '#1f2937', marginBottom: '2px' }}>
+              <p style={{ fontSize: '16px', fontWeight: '500', color: 'var(--color-text-primary)', marginBottom: '2px' }}>
                 {currentUser?.name || 'User'}
               </p>
-              <p style={{ fontSize: '14px', color: '#6b7280' }}>
+              <p style={{ fontSize: '14px', color: 'var(--color-text-secondary)' }}>
                 {currentUser?.email || 'No email set'}
               </p>
             </div>
@@ -100,24 +100,24 @@ const Settings: React.FC = () => {
             borderRadius: '8px',
             padding: '20px',
             marginBottom: '16px',
-            border: '1px solid #e5e7eb'
+            border: '1px solid var(--color-border)'
           }}>
-            <h3 style={{ fontSize: '16px', fontWeight: '500', color: '#1f2937', marginBottom: '16px' }}>
+            <h3 style={{ fontSize: '16px', fontWeight: '500', color: 'var(--color-text-primary)', marginBottom: '16px' }}>
               🏠 Current Group
             </h3>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>
-                <p style={{ fontSize: '16px', fontWeight: '500', color: '#1f2937', marginBottom: '2px' }}>
+                <p style={{ fontSize: '16px', fontWeight: '500', color: 'var(--color-text-primary)', marginBottom: '2px' }}>
                   {currentGroup.name}
                 </p>
-                <p style={{ fontSize: '14px', color: '#6b7280' }}>
+                <p style={{ fontSize: '14px', color: 'var(--color-text-secondary)' }}>
                   {currentGroup.members.filter(m => m.isActive).length} active members • {currentGroup.baseCurrency}
                 </p>
               </div>
               <div style={{
                 padding: '4px 8px',
-                backgroundColor: '#f0fdfa',
-                color: '#14b8a6',
+                backgroundColor: 'var(--color-surface)',
+                color: 'var(--color-primary)',
                 borderRadius: '4px',
                 fontSize: '12px',
                 fontWeight: '500'
@@ -134,15 +134,15 @@ const Settings: React.FC = () => {
           borderRadius: '8px',
           padding: '20px',
           marginBottom: '16px',
-          border: '1px solid #e5e7eb'
+          border: '1px solid var(--color-border)'
         }}>
-          <h3 style={{ fontSize: '16px', fontWeight: '500', color: '#1f2937', marginBottom: '16px' }}>
+          <h3 style={{ fontSize: '16px', fontWeight: '500', color: 'var(--color-text-primary)', marginBottom: '16px' }}>
             🎛️ Preferences
           </h3>
           
           {/* Default Currency */}
           <div style={{ marginBottom: '20px' }}>
-            <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#374151', marginBottom: '8px' }}>
+            <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: 'var(--color-text-primary)', marginBottom: '8px' }}>
               Default Currency
             </label>
             <select
@@ -151,14 +151,14 @@ const Settings: React.FC = () => {
               style={{
                 width: '100%',
                 padding: '12px',
-                border: '1px solid #d1d5db',
+                border: '1px solid var(--color-border)',
                 borderRadius: '6px',
                 fontSize: '16px',
                 backgroundColor: 'white',
-                color: '#1f2937'
+                color: 'var(--color-text-primary)'
               }}
-              onFocus={(e) => e.target.style.borderColor = '#14b8a6'}
-              onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
+              onFocus={(e) => e.target.style.borderColor = 'var(--color-primary)'}
+              onBlur={(e) => e.target.style.borderColor = 'var(--color-border)'}
             >
               {currencies.map(currency => (
                 <option key={currency.code} value={currency.code}>
@@ -176,9 +176,9 @@ const Settings: React.FC = () => {
           borderRadius: '8px',
           padding: '20px',
           marginBottom: '16px',
-          border: '1px solid #e5e7eb'
+          border: '1px solid var(--color-border)'
         }}>
-          <h3 style={{ fontSize: '16px', fontWeight: '500', color: '#1f2937', marginBottom: '16px' }}>
+          <h3 style={{ fontSize: '16px', fontWeight: '500', color: 'var(--color-text-primary)', marginBottom: '16px' }}>
             🔔 Notifications
           </h3>
           
@@ -195,7 +195,7 @@ const Settings: React.FC = () => {
                    key === 'settlementRequests' ? 'Settlement Requests' :
                    'Group Invites'}
                 </p>
-                <p style={{ fontSize: '12px', color: '#6b7280' }}>
+                <p style={{ fontSize: '12px', color: 'var(--color-text-secondary)' }}>
                   {key === 'expenseAdded' ? 'Get notified when expenses are added' :
                    key === 'settlementRequests' ? 'Get notified about payment requests' :
                    'Get notified about group invitations'}
@@ -208,7 +208,7 @@ const Settings: React.FC = () => {
                   height: '24px',
                   borderRadius: '12px',
                   border: 'none',
-                  backgroundColor: value ? '#14b8a6' : '#e5e7eb',
+                  backgroundColor: value ? 'var(--color-primary)' : 'var(--color-border)',
                   cursor: 'pointer',
                   position: 'relative',
                   transition: 'background-color 0.2s'
@@ -235,23 +235,23 @@ const Settings: React.FC = () => {
           borderRadius: '8px',
           padding: '20px',
           marginBottom: '16px',
-          border: '1px solid #e5e7eb'
+          border: '1px solid var(--color-border)'
         }}>
-          <h3 style={{ fontSize: '16px', fontWeight: '500', color: '#1f2937', marginBottom: '16px' }}>
+          <h3 style={{ fontSize: '16px', fontWeight: '500', color: 'var(--color-text-primary)', marginBottom: '16px' }}>
             ℹ️ About
           </h3>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <span style={{ fontSize: '14px', color: '#6b7280' }}>App Version</span>
-              <span style={{ fontSize: '14px', color: '#1f2937', fontWeight: '500' }}>1.0.0</span>
+              <span style={{ fontSize: '14px', color: 'var(--color-text-secondary)' }}>App Version</span>
+              <span style={{ fontSize: '14px', color: 'var(--color-text-primary)', fontWeight: '500' }}>1.0.0</span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <span style={{ fontSize: '14px', color: '#6b7280' }}>Build</span>
-              <span style={{ fontSize: '14px', color: '#1f2937', fontWeight: '500' }}>2025.08.07</span>
+              <span style={{ fontSize: '14px', color: 'var(--color-text-secondary)' }}>Build</span>
+              <span style={{ fontSize: '14px', color: 'var(--color-text-primary)', fontWeight: '500' }}>2025.08.07</span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <span style={{ fontSize: '14px', color: '#6b7280' }}>Storage Used</span>
-              <span style={{ fontSize: '14px', color: '#1f2937', fontWeight: '500' }}>
+              <span style={{ fontSize: '14px', color: 'var(--color-text-secondary)' }}>Storage Used</span>
+              <span style={{ fontSize: '14px', color: 'var(--color-text-primary)', fontWeight: '500' }}>
                 {currentGroup ? 
                   `${currentGroup.expenses.length} expenses, ${currentGroup.settlements.length} settlements` :
                   'No active group'
@@ -267,9 +267,9 @@ const Settings: React.FC = () => {
           borderRadius: '8px',
           padding: '20px',
           marginBottom: '16px',
-          border: '1px solid #e5e7eb'
+          border: '1px solid var(--color-border)'
         }}>
-          <h3 style={{ fontSize: '16px', fontWeight: '500', color: '#1f2937', marginBottom: '16px' }}>
+          <h3 style={{ fontSize: '16px', fontWeight: '500', color: 'var(--color-text-primary)', marginBottom: '16px' }}>
             💾 Data Management
           </h3>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
