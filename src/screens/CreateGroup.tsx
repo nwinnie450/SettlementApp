@@ -132,8 +132,8 @@ const CreateGroup: React.FC = () => {
               border: 'none',
               cursor: 'pointer'
             }}
-            onMouseOver={(e) => e.target.style.backgroundColor = '#f3f4f6'}
-            onMouseOut={(e) => e.target.style.backgroundColor = 'transparent'}
+            onMouseOver={(e) => (e.target as HTMLElement).style.backgroundColor = '#f3f4f6'}
+            onMouseOut={(e) => (e.target as HTMLElement).style.backgroundColor = 'transparent'}
           >
             <svg style={{ width: '24px', height: '24px', color: '#6b7280' }} fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
               <path d="M15 18l-6-6 6-6" />
@@ -224,12 +224,12 @@ const CreateGroup: React.FC = () => {
                   }}
                   onMouseOver={(e) => {
                     if (selectedCurrency !== currency.code) {
-                      e.target.style.borderColor = '#d1d5db';
+                      (e.target as HTMLElement).style.borderColor = '#d1d5db';
                     }
                   }}
                   onMouseOut={(e) => {
                     if (selectedCurrency !== currency.code) {
-                      e.target.style.borderColor = '#e5e7eb';
+                      (e.target as HTMLElement).style.borderColor = '#e5e7eb';
                     }
                   }}
                 >
@@ -258,12 +258,12 @@ const CreateGroup: React.FC = () => {
                   cursor: 'pointer'
                 }}
                 onMouseOver={(e) => {
-                  e.target.style.borderColor = '#14b8a6';
-                  e.target.style.color = '#14b8a6';
+                  (e.target as HTMLElement).style.borderColor = '#14b8a6';
+                  (e.target as HTMLElement).style.color = '#14b8a6';
                 }}
                 onMouseOut={(e) => {
-                  e.target.style.borderColor = '#d1d5db';
-                  e.target.style.color = '#6b7280';
+                  (e.target as HTMLElement).style.borderColor = '#d1d5db';
+                  (e.target as HTMLElement).style.color = '#6b7280';
                 }}
               >
                 + Add other currencies
@@ -283,8 +283,8 @@ const CreateGroup: React.FC = () => {
                   fontSize: '14px',
                   cursor: 'pointer'
                 }}
-                onMouseOver={(e) => e.target.style.color = '#374151'}
-                onMouseOut={(e) => e.target.style.color = '#6b7280'}
+                onMouseOver={(e) => (e.target as HTMLElement).style.color = '#374151'}
+                onMouseOut={(e) => (e.target as HTMLElement).style.color = '#6b7280'}
               >
                 Show less currencies
               </button>
@@ -320,12 +320,12 @@ const CreateGroup: React.FC = () => {
             }}
             onMouseOver={(e) => {
               if (!isLoading && userName.trim() && groupName.trim()) {
-                e.target.style.backgroundColor = '#0d9488';
+                (e.target as HTMLElement).style.backgroundColor = '#0d9488';
               }
             }}
             onMouseOut={(e) => {
               if (!isLoading && userName.trim() && groupName.trim()) {
-                e.target.style.backgroundColor = '#14b8a6';
+                (e.target as HTMLElement).style.backgroundColor = '#14b8a6';
               }
             }}
           >
