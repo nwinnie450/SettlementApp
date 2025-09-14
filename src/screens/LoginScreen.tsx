@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
-import { Button } from '../components/ui/Button';
+import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
 import { useAuthStore } from '../stores/useAuthStore';
 import { LoginCredentials } from '../types';

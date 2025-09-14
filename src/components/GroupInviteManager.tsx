@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Button } from './ui/Button';
+import Button from './ui/Button';
 import { Modal } from './ui/Modal';
 import { useGroupStore } from '../stores/useGroupStore';
 import { useAuthStore } from '../stores/useAuthStore';

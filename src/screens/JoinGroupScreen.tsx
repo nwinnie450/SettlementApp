@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Button } from '../components/ui/Button';
+import Button from '../components/ui/Button';
 import { useAuthStore } from '../stores/useAuthStore';
 import { useGroupStore } from '../stores/useGroupStore';
 import { GroupInviteLink, JoinGroupRequest } from '../types';
