@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import Button from './ui/Button';
-import { Modal } from './ui/Modal';
+import Modal from './ui/Modal';
 import { useGroupStore } from '../stores/useGroupStore';
 import { useAuthStore } from '../stores/useAuthStore';
 import { Group, GroupInvite, GroupInviteLink, GroupRole } from '../types';
