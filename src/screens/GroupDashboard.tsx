@@ -5,12 +5,15 @@ import { useGroupStore } from '../stores/useGroupStore';
 import { formatCurrency } from '../utils/settlements';
 import ManageMembers from '../components/forms/ManageMembers';
 import ActivityFeed from '../components/ActivityFeed';
+import QuickAddExpense from '../components/QuickAddExpense';
+import CategoryBadge from '../components/CategoryBadge';
 
 const GroupDashboard: React.FC = () => {
   const navigate = useNavigate();
   const { currentUser } = useAppStore();
   const { currentGroup, balances, loadGroups, initializeActiveGroup } = useGroupStore();
   const [showManageMembers, setShowManageMembers] = useState(false);
+  const [showQuickAdd, setShowQuickAdd] = useState(false);
 
   useEffect(() => {
     // Load groups and initialize active group
@@ -334,8 +337,11 @@ const GroupDashboard: React.FC = () => {
                 >
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <div style={{ flex: '1' }}>
-                      <p style={{ fontWeight: '500', color: '#1f2937', marginBottom: '2px' }}>{expense.description}</p>
-                      <p style={{ fontSize: '14px', color: '#6b7280' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                        <p style={{ fontWeight: '500', color: '#1f2937', margin: 0 }}>{expense.description}</p>
+                        {expense.category && <CategoryBadge categoryId={expense.category} size="small" showLabel={false} />}
+                      </div>
+                      <p style={{ fontSize: '14px', color: '#6b7280', margin: 0 }}>
                         {paidByMember?.name || 'Someone'} paid {formatCurrency(expense.amount, expense.currency)}
                       </p>
                     </div>
@@ -366,10 +372,10 @@ const GroupDashboard: React.FC = () => {
         {currentGroup && <ActivityFeed group={currentGroup} limit={8} />}
       </div>
 
-      {/* Add Expense Button */}
+      {/* Quick Add Expense Button */}
       <div style={{ position: 'fixed', bottom: '80px', right: '24px' }}>
         <button
-          onClick={() => navigate('/add-expense')}
+          onClick={() => setShowQuickAdd(true)}
           style={{
             width: '56px',
             height: '56px',
@@ -392,10 +398,14 @@ const GroupDashboard: React.FC = () => {
         </button>
       </div>
 
-      {/* Manage Members Modal */}
+      {/* Modals */}
       <ManageMembers
         isOpen={showManageMembers}
         onClose={() => setShowManageMembers(false)}
+      />
+      <QuickAddExpense
+        isOpen={showQuickAdd}
+        onClose={() => setShowQuickAdd(false)}
       />
     </div>
   );

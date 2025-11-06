@@ -4,6 +4,7 @@ import ManageMembers from '../components/forms/ManageMembers';
 import { useAppStore } from '../stores/useAppStore';
 import { useGroupStore } from '../stores/useGroupStore';
 import { Expense, ExpenseSplit } from '../types';
+import { EXPENSE_CATEGORIES } from '../utils/categories';
 
 type SplitType = 'equal' | 'custom' | 'percentage';
 
@@ -32,15 +33,11 @@ const AddExpense: React.FC = () => {
   const [editingMember, setEditingMember] = useState<string | null>(null);
   const [editName, setEditName] = useState('');
 
-  const categories = [
-    { value: 'food', label: '🍕 Food & Dining' },
-    { value: 'transport', label: '🚗 Transportation' },
-    { value: 'accommodation', label: '🏨 Accommodation' },
-    { value: 'entertainment', label: '🎬 Entertainment' },
-    { value: 'shopping', label: '🛍️ Shopping' },
-    { value: 'utilities', label: '⚡ Utilities' },
-    { value: 'general', label: '📝 General' }
-  ];
+  // Use categories from centralized config
+  const categories = EXPENSE_CATEGORIES.map(cat => ({
+    value: cat.id,
+    label: `${cat.icon} ${cat.label}`
+  }));
 
   useEffect(() => {
     if (!currentGroup || !currentUser) {
