@@ -16,40 +16,68 @@ const Button: React.FC<ButtonProps> = ({
     'inline-flex',
     'items-center',
     'justify-center',
-    'font-medium',
-    'rounded-md',
-    'transition',
+    'font-semibold',
+    'rounded-lg',
+    'transition-all',
+    'duration-200',
+    'ease-out',
     'focus:outline-none',
-    'focus:ring-2',
-    'focus:ring-primary',
-    'active:scale-95'
+    'focus:ring-3',
+    'focus:ring-primary/30',
+    'focus:ring-offset-2',
+    'active:scale-95',
+    'transform',
+    'relative',
+    'overflow-hidden'
   ];
 
   const variantClasses = {
     primary: [
       'text-white',
-      'hover:opacity-90'
+      'bg-gradient-to-r',
+      'from-teal-500',
+      'to-teal-600',
+      'hover:from-teal-600',
+      'hover:to-teal-700',
+      'hover:shadow-lg',
+      'hover:shadow-teal-500/50',
+      'hover:-translate-y-0.5',
+      'shadow-md'
     ],
     secondary: [
-      'text-secondary',
-      'border',
-      'hover:opacity-80'
+      'text-gray-700',
+      'bg-white',
+      'border-2',
+      'border-gray-200',
+      'hover:border-teal-500',
+      'hover:text-teal-600',
+      'hover:shadow-md',
+      'hover:-translate-y-0.5'
     ],
     text: [
       'bg-transparent',
-      'text-secondary',
-      'hover:opacity-80'
+      'text-gray-600',
+      'hover:text-teal-600',
+      'hover:bg-teal-50'
     ],
     danger: [
       'text-white',
-      'hover:opacity-90'
+      'bg-gradient-to-r',
+      'from-red-500',
+      'to-red-600',
+      'hover:from-red-600',
+      'hover:to-red-700',
+      'hover:shadow-lg',
+      'hover:shadow-red-500/50',
+      'hover:-translate-y-0.5',
+      'shadow-md'
     ]
   };
 
   const sizeClasses = {
-    small: ['px-3', 'py-1.5', 'text-sm', 'h-8'],
-    medium: ['px-6', 'py-3', 'text-base', 'h-12'],
-    large: ['px-8', 'py-4', 'text-lg', 'h-14']
+    small: ['px-3', 'py-2', 'text-sm', 'h-9', 'gap-1.5'],
+    medium: ['px-6', 'py-3', 'text-base', 'h-12', 'gap-2'],
+    large: ['px-8', 'py-4', 'text-lg', 'h-14', 'gap-2.5']
   };
 
   const classes = [
@@ -57,22 +85,9 @@ const Button: React.FC<ButtonProps> = ({
     ...variantClasses[variant],
     ...sizeClasses[size],
     fullWidth ? 'w-full' : '',
-    disabled || loading ? 'cursor-not-allowed opacity-60' : 'cursor-pointer',
+    disabled || loading ? 'cursor-not-allowed opacity-50 hover:shadow-none hover:translate-y-0' : 'cursor-pointer',
     className
   ].filter(Boolean).join(' ');
-
-  const getButtonStyle = () => {
-    const baseStyle = {
-      backgroundColor: variant === 'primary' ? '#14b8a6' :
-                     variant === 'secondary' ? 'white' :
-                     variant === 'danger' ? '#ef4444' : 'transparent',
-      borderColor: variant === 'secondary' ? '#d1d5db' : 'transparent',
-      color: variant === 'primary' ? 'white' :
-             variant === 'secondary' ? '#374151' :
-             variant === 'danger' ? 'white' : '#6b7280'
-    };
-    return baseStyle;
-  };
 
   return (
     <button
@@ -80,36 +95,19 @@ const Button: React.FC<ButtonProps> = ({
       onClick={disabled || loading ? undefined : onClick}
       disabled={disabled || loading}
       className={classes}
-      style={getButtonStyle()}
-      onMouseOver={(e) => {
-        if (!disabled && !loading) {
-          if (variant === 'primary') {
-            e.currentTarget.style.backgroundColor = '#0d9488';
-          } else if (variant === 'secondary') {
-            e.currentTarget.style.backgroundColor = '#f9fafb';
-          } else if (variant === 'danger') {
-            e.currentTarget.style.backgroundColor = '#dc2626';
-          }
-        }
-      }}
-      onMouseOut={(e) => {
-        if (!disabled && !loading) {
-          if (variant === 'primary') {
-            e.currentTarget.style.backgroundColor = '#14b8a6';
-          } else if (variant === 'secondary') {
-            e.currentTarget.style.backgroundColor = 'white';
-          } else if (variant === 'danger') {
-            e.currentTarget.style.backgroundColor = '#ef4444';
-          }
-        }
-      }}
     >
+      {/* Shimmer effect overlay for primary/danger buttons */}
+      {(variant === 'primary' || variant === 'danger') && !disabled && !loading && (
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
+      )}
+
       {loading && (
         <svg
-          className="animate-spin -ml-1 mr-2 h-4 w-4 text-current"
+          className="animate-spin -ml-1 mr-2 h-5 w-5 text-current"
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
           viewBox="0 0 24 24"
+          aria-hidden="true"
         >
           <circle
             className="opacity-25"
@@ -126,7 +124,8 @@ const Button: React.FC<ButtonProps> = ({
           ></path>
         </svg>
       )}
-      {children}
+
+      <span className="relative z-10">{children}</span>
     </button>
   );
 };

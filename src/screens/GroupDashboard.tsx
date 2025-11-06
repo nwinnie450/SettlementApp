@@ -308,32 +308,113 @@ const GroupDashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* Balance Summary */}
-      <div style={{ backgroundColor: 'white', padding: '24px', borderBottom: '1px solid #e5e7eb' }}>
-        <div style={{ textAlign: 'center', maxWidth: '448px', margin: '0 auto' }}>
-          <p style={{ color: '#6b7280', marginBottom: '8px' }}>overall, you are</p>
-          <div style={{ marginBottom: '16px' }}>
+      {/* Balance Summary - Enhanced with gradient */}
+      <div style={{
+        background: isEven
+          ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)'
+          : isOwed
+            ? 'linear-gradient(135deg, #14b8a6 0%, #0d9488 100%)'
+            : 'linear-gradient(135deg, #f97316 0%, #ea580c 100%)',
+        padding: '32px 24px',
+        position: 'relative',
+        overflow: 'hidden'
+      }}>
+        {/* Decorative background circles */}
+        <div style={{
+          position: 'absolute',
+          top: '-50px',
+          right: '-50px',
+          width: '200px',
+          height: '200px',
+          borderRadius: '50%',
+          background: 'rgba(255, 255, 255, 0.1)',
+          filter: 'blur(40px)'
+        }} />
+        <div style={{
+          position: 'absolute',
+          bottom: '-30px',
+          left: '-30px',
+          width: '150px',
+          height: '150px',
+          borderRadius: '50%',
+          background: 'rgba(255, 255, 255, 0.1)',
+          filter: 'blur(30px)'
+        }} />
+
+        <div style={{ textAlign: 'center', maxWidth: '448px', margin: '0 auto', position: 'relative', zIndex: 1 }}>
+          <p style={{
+            color: 'rgba(255, 255, 255, 0.9)',
+            marginBottom: '12px',
+            fontSize: '14px',
+            fontWeight: '500',
+            letterSpacing: '0.5px',
+            textTransform: 'uppercase'
+          }}>
+            Overall Balance
+          </p>
+          <div style={{ marginBottom: '8px' }}>
             {isEven ? (
-              <span style={{ fontSize: '24px', fontWeight: '300', color: '#374151' }}>settled up</span>
+              <div>
+                <div style={{
+                  fontSize: '48px',
+                  fontWeight: '700',
+                  color: 'white',
+                  textShadow: '0 2px 10px rgba(0, 0, 0, 0.1)',
+                  marginBottom: '8px'
+                }}>
+                  ✓
+                </div>
+                <span style={{
+                  fontSize: '28px',
+                  fontWeight: '600',
+                  color: 'white',
+                  textShadow: '0 2px 10px rgba(0, 0, 0, 0.1)'
+                }}>
+                  All Settled Up!
+                </span>
+              </div>
             ) : (
               <div>
-                <span style={{ 
-                  fontSize: '24px', 
-                  fontWeight: '300', 
-                  color: isOwed ? '#14b8a6' : '#f97316' 
+                <p style={{
+                  fontSize: '16px',
+                  fontWeight: '500',
+                  color: 'rgba(255, 255, 255, 0.95)',
+                  marginBottom: '8px',
+                  textShadow: '0 1px 3px rgba(0, 0, 0, 0.1)'
                 }}>
-                  {isOwed ? 'owed' : 'owe'}
-                </span>
-                <div style={{ 
-                  fontSize: '32px', 
-                  fontWeight: '300', 
-                  marginTop: '4px', 
-                  color: isOwed ? '#14b8a6' : '#f97316' 
+                  You are {isOwed ? 'owed' : 'owing'}
+                </p>
+                <div style={{
+                  fontSize: '48px',
+                  fontWeight: '700',
+                  color: 'white',
+                  textShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+                  letterSpacing: '-1px',
+                  fontFamily: '"SF Mono", Monaco, "Cascadia Code", "Roboto Mono", Consolas, "Courier New", monospace'
                 }}>
                   {formatCurrency(Math.abs(netAmount), currentGroup?.baseCurrency || 'SGD')}
                 </div>
               </div>
             )}
+          </div>
+
+          {/* Quick action hint */}
+          <div style={{
+            marginTop: '16px',
+            padding: '8px 16px',
+            background: 'rgba(255, 255, 255, 0.2)',
+            borderRadius: '20px',
+            backdropFilter: 'blur(10px)',
+            display: 'inline-block'
+          }}>
+            <p style={{
+              fontSize: '13px',
+              color: 'white',
+              margin: 0,
+              fontWeight: '500'
+            }}>
+              {isEven ? '🎉 Great job!' : isOwed ? '💰 Collect payments' : '💸 Settle your balance'}
+            </p>
           </div>
         </div>
       </div>
