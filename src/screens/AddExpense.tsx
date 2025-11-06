@@ -14,6 +14,7 @@ import {
 } from '../services/exchangeRateService';
 import ItemizedExpense, { type LineItem } from '../components/ItemizedExpense';
 import { notifyNewExpense, areNotificationsEnabled } from '../services/browserNotifications';
+import DragDropPhotoUpload from '../components/DragDropPhotoUpload';
 
 type SplitType = 'equal' | 'custom' | 'percentage' | 'items';
 
@@ -388,69 +389,6 @@ const AddExpense: React.FC = () => {
           <div style={{ backgroundColor: 'white', borderRadius: '8px', padding: '20px', marginBottom: '16px', boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)', border: '1px solid #e5e7eb' }}>
             <h3 style={{ fontSize: '16px', fontWeight: '500', color: '#1f2937', marginBottom: '16px' }}>Expense details</h3>
             
-            {/* Photo attachment */}
-            <div style={{ marginBottom: '16px' }}>
-              <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#1f2937', marginBottom: '6px' }}>
-                📸 Photo (Optional)
-              </label>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (file) {
-                    const reader = new FileReader();
-                    reader.onload = () => {
-                      setFormData({ ...formData, photo: reader.result as string });
-                    };
-                    reader.readAsDataURL(file);
-                  }
-                }}
-                style={{
-                  width: '100%',
-                  padding: '12px',
-                  fontSize: '14px',
-                  border: '1px solid #e5e7eb',
-                  borderRadius: '6px',
-                  outline: 'none',
-                  backgroundColor: 'white',
-                  color: '#1f2937'
-                }}
-                onFocus={(e) => e.target.style.borderColor = '#14b8a6'}
-                onBlur={(e) => e.target.style.borderColor = 'var(--color-border)'}
-              />
-              {formData.photo && (
-                <div style={{ marginTop: '8px' }}>
-                  <img 
-                    src={formData.photo} 
-                    alt="Expense receipt" 
-                    style={{ 
-                      maxWidth: '200px', 
-                      maxHeight: '150px', 
-                      objectFit: 'cover',
-                      borderRadius: '6px',
-                      border: '1px solid #e5e7eb'
-                    }} 
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setFormData({ ...formData, photo: null })}
-                    style={{
-                      marginLeft: '8px',
-                      padding: '4px 8px',
-                      backgroundColor: '#ef4444',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '4px',
-                      fontSize: '12px',
-                      cursor: 'pointer'
-                    }}
-                  >
-                    Remove
-                  </button>
-                </div>
-              )}
-            </div>
             
             <div style={{ marginBottom: '16px' }}>
               <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#374151', marginBottom: '6px' }}>
@@ -508,71 +446,15 @@ const AddExpense: React.FC = () => {
 
             {/* Receipt Photo Upload */}
             <div style={{ marginBottom: '16px' }}>
-              <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#1f2937', marginBottom: '6px' }}>
+              <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#1f2937', marginBottom: '8px' }}>
                 📸 Receipt Photo (Optional)
               </label>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (file) {
-                    // Check file size (max 2MB)
-                    if (file.size > 2 * 1024 * 1024) {
-                      alert('File is too large. Maximum size is 2MB.');
-                      return;
-                    }
-                    const reader = new FileReader();
-                    reader.onloadend = () => {
-                      setFormData({ ...formData, photo: reader.result as string });
-                    };
-                    reader.readAsDataURL(file);
-                  }
-                }}
-                style={{
-                  width: '100%',
-                  padding: '12px',
-                  border: '1px solid #e5e7eb',
-                  borderRadius: '6px',
-                  fontSize: '14px',
-                  backgroundColor: 'white',
-                  cursor: 'pointer'
-                }}
+              <DragDropPhotoUpload
+                onPhotoSelect={(photoDataUrl) => setFormData({ ...formData, photo: photoDataUrl })}
+                currentPhoto={formData.photo}
+                onRemovePhoto={() => setFormData({ ...formData, photo: null })}
+                maxSizeMB={2}
               />
-              {formData.photo && (
-                <div style={{ marginTop: '12px', position: 'relative' }}>
-                  <img
-                    src={formData.photo}
-                    alt="Receipt preview"
-                    style={{
-                      width: '100%',
-                      maxHeight: '200px',
-                      objectFit: 'contain',
-                      borderRadius: '8px',
-                      border: '1px solid #e5e7eb'
-                    }}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setFormData({ ...formData, photo: null })}
-                    style={{
-                      position: 'absolute',
-                      top: '8px',
-                      right: '8px',
-                      padding: '4px 8px',
-                      backgroundColor: '#ef4444',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '4px',
-                      fontSize: '12px',
-                      cursor: 'pointer',
-                      fontWeight: '500'
-                    }}
-                  >
-                    ✕ Remove
-                  </button>
-                </div>
-              )}
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>

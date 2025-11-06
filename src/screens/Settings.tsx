@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { useAppStore } from '../stores/useAppStore';
 import { useGroupStore } from '../stores/useGroupStore';
 import { clearAllData } from '../utils/storage';
+import DarkModeToggle from '../components/DarkModeToggle';
+import { useThemeStore } from '../stores/useThemeStore';
 
 const Settings: React.FC = () => {
   const navigate = useNavigate();
@@ -89,6 +91,77 @@ const Settings: React.FC = () => {
               <p style={{ fontSize: '14px', color: 'var(--color-text-secondary)' }}>
                 {currentUser?.email || 'No email set'}
               </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Appearance Settings */}
+        <div style={{
+          backgroundColor: 'white',
+          borderRadius: '12px',
+          padding: '24px',
+          marginBottom: '16px',
+          border: '1px solid var(--color-border)',
+          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)'
+        }}>
+          <h3 style={{ fontSize: '16px', fontWeight: '600', color: 'var(--color-text-primary)', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            🎨 Appearance
+          </h3>
+
+          {/* Dark Mode Toggle */}
+          <div style={{ marginBottom: '24px' }}>
+            <p style={{ fontSize: '14px', fontWeight: '500', color: 'var(--color-text-primary)', marginBottom: '12px' }}>
+              Theme Mode
+            </p>
+            <DarkModeToggle />
+          </div>
+
+          {/* Theme Color Picker */}
+          <div>
+            <p style={{ fontSize: '14px', fontWeight: '500', color: 'var(--color-text-primary)', marginBottom: '12px' }}>
+              Accent Color
+            </p>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: '12px' }}>
+              {[
+                { color: '#14b8a6', name: 'Teal' },
+                { color: '#3b82f6', name: 'Blue' },
+                { color: '#8b5cf6', name: 'Purple' },
+                { color: '#ec4899', name: 'Pink' },
+                { color: '#f59e0b', name: 'Amber' },
+                { color: '#10b981', name: 'Green' },
+              ].map((theme) => (
+                <button
+                  key={theme.color}
+                  onClick={() => useThemeStore.getState().setAccentColor(theme.color)}
+                  style={{
+                    width: '48px',
+                    height: '48px',
+                    borderRadius: '12px',
+                    backgroundColor: theme.color,
+                    border: useThemeStore.getState().accentColor === theme.color ? '3px solid white' : '2px solid transparent',
+                    boxShadow: useThemeStore.getState().accentColor === theme.color
+                      ? `0 0 0 2px ${theme.color}, 0 4px 12px ${theme.color}40`
+                      : '0 2px 4px rgba(0, 0, 0, 0.1)',
+                    cursor: 'pointer',
+                    transition: 'all 200ms ease',
+                    transform: useThemeStore.getState().accentColor === theme.color ? 'scale(1.1)' : 'scale(1)',
+                  }}
+                  onMouseOver={(e) => {
+                    if (useThemeStore.getState().accentColor !== theme.color) {
+                      e.currentTarget.style.transform = 'scale(1.05)';
+                      e.currentTarget.style.boxShadow = `0 4px 8px ${theme.color}40`;
+                    }
+                  }}
+                  onMouseOut={(e) => {
+                    if (useThemeStore.getState().accentColor !== theme.color) {
+                      e.currentTarget.style.transform = 'scale(1)';
+                      e.currentTarget.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.1)';
+                    }
+                  }}
+                  aria-label={`Select ${theme.name} theme`}
+                  title={theme.name}
+                />
+              ))}
             </div>
           </div>
         </div>

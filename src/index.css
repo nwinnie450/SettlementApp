@@ -81,9 +81,27 @@
   --gradient-primary: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
 }
 
-/* Dark theme variables */
+/* Dark theme variables - Manual Toggle */
+.dark {
+  --color-background: #0F172A;
+  --color-surface: #1E293B;
+  --color-border: #334155;
+  --color-text-primary: #F8FAFC;
+  --color-text-secondary: #CBD5E1;
+  --color-text-disabled: #64748B;
+
+  /* Gradients for dark mode */
+  --gradient-primary: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%);
+
+  /* Shadows for dark mode */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.5);
+}
+
+/* Dark theme - System Preference (fallback) */
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not(.light) {
     --color-background: #0F172A;
     --color-surface: #1E293B;
     --color-border: #334155;
