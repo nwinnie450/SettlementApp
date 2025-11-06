@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import QRCode from 'qrcode';
 import Button from './ui/Button';
 import Modal from './ui/Modal';
 import { useGroupStore } from '../stores/useGroupStore';
@@ -18,6 +19,9 @@ const GroupInviteManager: React.FC<GroupInviteManagerProps> = ({ group, onClose 
   const [inviteLink, setInviteLink] = useState<GroupInviteLink | null>(null);
   const [copied, setCopied] = useState(false);
   const [loading, setLoading] = useState<Record<string, boolean>>({});
+  const [qrCodeDataUrl, setQrCodeDataUrl] = useState<string | null>(null);
+  const [showQrCode, setShowQrCode] = useState(false);
+  const qrCanvasRef = useRef<HTMLCanvasElement>(null);
 
   // Check if user is admin
   const isAdmin = user && (
@@ -37,6 +41,30 @@ const GroupInviteManager: React.FC<GroupInviteManagerProps> = ({ group, onClose 
     );
   }
 
+  // Generate QR code when invite link is created
+  useEffect(() => {
+    if (inviteLink?.url) {
+      generateQRCode(inviteLink.url);
+    }
+  }, [inviteLink]);
+
+  const generateQRCode = async (url: string) => {
+    try {
+      const qrDataUrl = await QRCode.toDataURL(url, {
+        width: 300,
+        margin: 2,
+        color: {
+          dark: '#14b8a6', // Teal color
+          light: '#ffffff'
+        },
+        errorCorrectionLevel: 'H'
+      });
+      setQrCodeDataUrl(qrDataUrl);
+    } catch (error) {
+      console.error('Error generating QR code:', error);
+    }
+  };
+
   const handleGenerateLink = () => {
     if (!user) return;
 
@@ -44,6 +72,15 @@ const GroupInviteManager: React.FC<GroupInviteManagerProps> = ({ group, onClose 
     if (link) {
       setInviteLink(link);
     }
+  };
+
+  const handleDownloadQR = () => {
+    if (!qrCodeDataUrl) return;
+
+    const link = document.createElement('a');
+    link.download = `${group.name}-invite-qr.png`;
+    link.href = qrCodeDataUrl;
+    link.click();
   };
 
   const handleCopyLink = async () => {
@@ -185,13 +222,50 @@ const GroupInviteManager: React.FC<GroupInviteManagerProps> = ({ group, onClose 
                     Share Link
                   </Button>
                   <Button
-                    onClick={() => setInviteLink(null)}
-                    variant="text"
+                    onClick={() => setShowQrCode(!showQrCode)}
+                    variant="secondary"
                     fullWidth
                   >
-                    Generate New Link
+                    {showQrCode ? 'Hide' : 'Show'} QR Code
                   </Button>
                 </div>
+
+                {/* QR Code Display */}
+                {showQrCode && qrCodeDataUrl && (
+                  <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                    <div className="text-center">
+                      <p className="text-sm font-medium text-gray-700 mb-3">Scan to Join Group</p>
+                      <div className="inline-block p-4 bg-white rounded-lg shadow-sm">
+                        <img
+                          src={qrCodeDataUrl}
+                          alt="Group Invite QR Code"
+                          className="w-64 h-64"
+                        />
+                      </div>
+                      <div className="mt-4 flex space-x-2">
+                        <Button
+                          onClick={handleDownloadQR}
+                          variant="secondary"
+                          size="small"
+                          fullWidth
+                        >
+                          Download QR Code
+                        </Button>
+                        <Button
+                          onClick={() => setInviteLink(null)}
+                          variant="text"
+                          size="small"
+                          fullWidth
+                        >
+                          Generate New
+                        </Button>
+                      </div>
+                      <p className="text-xs text-gray-500 mt-2">
+                        Anyone can scan this code to request joining your group
+                      </p>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>

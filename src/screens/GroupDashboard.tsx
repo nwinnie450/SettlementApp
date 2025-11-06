@@ -4,6 +4,7 @@ import { useAppStore } from '../stores/useAppStore';
 import { useGroupStore } from '../stores/useGroupStore';
 import { formatCurrency } from '../utils/settlements';
 import ManageMembers from '../components/forms/ManageMembers';
+import ActivityFeed from '../components/ActivityFeed';
 
 const GroupDashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -353,6 +354,16 @@ const GroupDashboard: React.FC = () => {
             })}
           </div>
         )}
+      </div>
+
+      {/* Activity Feed */}
+      <div style={{
+        margin: '24px 16px 100px',
+        maxWidth: '448px',
+        marginLeft: 'auto',
+        marginRight: 'auto'
+      }}>
+        {currentGroup && <ActivityFeed group={currentGroup} limit={8} />}
       </div>
 
       {/* Add Expense Button */}
