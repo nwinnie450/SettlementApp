@@ -8,6 +8,8 @@ import ActivityFeed from '../components/ActivityFeed';
 import QuickAddExpense from '../components/QuickAddExpense';
 import CategoryBadge from '../components/CategoryBadge';
 import SpendingInsights from '../components/SpendingInsights';
+import { exportToCSV, exportToPDF, exportSettlementsToCSV } from '../services/exportService';
+import NotificationSettings from '../components/NotificationSettings';
 
 const GroupDashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -15,6 +17,7 @@ const GroupDashboard: React.FC = () => {
   const { currentGroup, balances, loadGroups, initializeActiveGroup } = useGroupStore();
   const [showManageMembers, setShowManageMembers] = useState(false);
   const [showQuickAdd, setShowQuickAdd] = useState(false);
+  const [showExportMenu, setShowExportMenu] = useState(false);
 
   useEffect(() => {
     // Load groups and initialize active group
@@ -89,29 +92,140 @@ const GroupDashboard: React.FC = () => {
               {currentGroup?.members?.filter(m => m.isActive).length || 0} members • {currentGroup?.baseCurrency}
             </p>
           </div>
-          <button
-            onClick={() => navigate('/groups')}
-            style={{
-              padding: '8px 12px',
-              backgroundColor: 'transparent',
-              color: '#6b7280',
-              border: '1px solid #e5e7eb',
-              borderRadius: '6px',
-              fontSize: '12px',
-              fontWeight: '500',
-              cursor: 'pointer'
-            }}
-            onMouseOver={(e) => {
-              e.target.style.backgroundColor = '#f3f4f6';
-              e.target.style.color = '#14b8a6';
-            }}
-            onMouseOut={(e) => {
-              e.target.style.backgroundColor = 'transparent';
-              e.target.style.color = '#6b7280';
-            }}
-          >
-            Switch Group
-          </button>
+          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+            {/* Export Button */}
+            <div style={{ position: 'relative' }}>
+              <button
+                onClick={() => setShowExportMenu(!showExportMenu)}
+                style={{
+                  padding: '8px 12px',
+                  backgroundColor: 'transparent',
+                  color: '#6b7280',
+                  border: '1px solid #e5e7eb',
+                  borderRadius: '6px',
+                  fontSize: '12px',
+                  fontWeight: '500',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px'
+                }}
+                onMouseOver={(e) => {
+                  e.currentTarget.style.backgroundColor = '#f3f4f6';
+                  e.currentTarget.style.color = '#14b8a6';
+                }}
+                onMouseOut={(e) => {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                  e.currentTarget.style.color = '#6b7280';
+                }}
+              >
+                📥 Export
+              </button>
+
+              {/* Export Dropdown */}
+              {showExportMenu && (
+                <div style={{
+                  position: 'absolute',
+                  top: '100%',
+                  right: 0,
+                  marginTop: '8px',
+                  backgroundColor: 'white',
+                  border: '1px solid #e5e7eb',
+                  borderRadius: '8px',
+                  boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+                  zIndex: 50,
+                  minWidth: '180px'
+                }}>
+                  <button
+                    onClick={() => {
+                      if (currentGroup) exportToCSV(currentGroup);
+                      setShowExportMenu(false);
+                    }}
+                    style={{
+                      width: '100%',
+                      padding: '12px 16px',
+                      backgroundColor: 'transparent',
+                      border: 'none',
+                      textAlign: 'left',
+                      cursor: 'pointer',
+                      fontSize: '14px',
+                      color: '#1f2937',
+                      borderBottom: '1px solid #e5e7eb'
+                    }}
+                    onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#f9fafb'}
+                    onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                  >
+                    📄 Export to CSV
+                  </button>
+                  <button
+                    onClick={() => {
+                      if (currentGroup) exportToPDF(currentGroup);
+                      setShowExportMenu(false);
+                    }}
+                    style={{
+                      width: '100%',
+                      padding: '12px 16px',
+                      backgroundColor: 'transparent',
+                      border: 'none',
+                      textAlign: 'left',
+                      cursor: 'pointer',
+                      fontSize: '14px',
+                      color: '#1f2937',
+                      borderBottom: '1px solid #e5e7eb'
+                    }}
+                    onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#f9fafb'}
+                    onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                  >
+                    📑 Export to PDF
+                  </button>
+                  <button
+                    onClick={() => {
+                      if (currentGroup) exportSettlementsToCSV(currentGroup);
+                      setShowExportMenu(false);
+                    }}
+                    style={{
+                      width: '100%',
+                      padding: '12px 16px',
+                      backgroundColor: 'transparent',
+                      border: 'none',
+                      textAlign: 'left',
+                      cursor: 'pointer',
+                      fontSize: '14px',
+                      color: '#1f2937'
+                    }}
+                    onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#f9fafb'}
+                    onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                  >
+                    💰 Export Settlements
+                  </button>
+                </div>
+              )}
+            </div>
+
+            <button
+              onClick={() => navigate('/groups')}
+              style={{
+                padding: '8px 12px',
+                backgroundColor: 'transparent',
+                color: '#6b7280',
+                border: '1px solid #e5e7eb',
+                borderRadius: '6px',
+                fontSize: '12px',
+                fontWeight: '500',
+                cursor: 'pointer'
+              }}
+              onMouseOver={(e) => {
+                e.currentTarget.style.backgroundColor = '#f3f4f6';
+                e.currentTarget.style.color = '#14b8a6';
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.backgroundColor = 'transparent';
+                e.currentTarget.style.color = '#6b7280';
+              }}
+            >
+              Switch Group
+            </button>
+          </div>
         </div>
       </div>
 
@@ -153,6 +267,16 @@ const GroupDashboard: React.FC = () => {
         marginRight: 'auto'
       }}>
         <SpendingInsights group={currentGroup} userId={currentUser?.id} />
+      </div>
+
+      {/* Notification Settings */}
+      <div style={{
+        margin: '24px 16px',
+        maxWidth: '448px',
+        marginLeft: 'auto',
+        marginRight: 'auto'
+      }}>
+        <NotificationSettings />
       </div>
 
       {/* Members */}

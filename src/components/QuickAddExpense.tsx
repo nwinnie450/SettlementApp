@@ -7,6 +7,8 @@ import { useAppStore } from '../stores/useAppStore';
 import { useGroupStore } from '../stores/useGroupStore';
 import { Expense, ExpenseSplit } from '../types';
 import { EXPENSE_CATEGORIES, getCategoryConfig } from '../utils/categories';
+import { fetchExchangeRates, convertCurrency, type ExchangeRates } from '../services/exchangeRateService';
+import { notifyNewExpense, areNotificationsEnabled } from '../services/browserNotifications';
 
 interface QuickAddExpenseProps {
   isOpen: boolean;
@@ -24,12 +26,22 @@ const QuickAddExpense: React.FC<QuickAddExpenseProps> = ({ isOpen, onClose }) =>
   const [paidBy, setPaidBy] = useState(currentUser?.id || '');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const [exchangeRates, setExchangeRates] = useState<ExchangeRates | null>(null);
 
   useEffect(() => {
     if (currentUser?.id) {
       setPaidBy(currentUser.id);
     }
   }, [currentUser]);
+
+  // Fetch exchange rates when modal opens
+  useEffect(() => {
+    if (isOpen && currentGroup) {
+      fetchExchangeRates(currentGroup.baseCurrency)
+        .then(rates => setExchangeRates(rates))
+        .catch(err => console.error('Failed to load exchange rates:', err));
+    }
+  }, [isOpen, currentGroup]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -62,6 +74,7 @@ const QuickAddExpense: React.FC<QuickAddExpenseProps> = ({ isOpen, onClose }) =>
         percentage: 100 / activeMembers.length
       }));
 
+      // In quick add, we always use base currency for simplicity
       const newExpense: Expense = {
         id: `expense_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
         groupId: currentGroup.id,
@@ -80,6 +93,17 @@ const QuickAddExpense: React.FC<QuickAddExpenseProps> = ({ isOpen, onClose }) =>
       const success = await addExpense(newExpense);
 
       if (success) {
+        // Send browser notification if enabled
+        if (areNotificationsEnabled()) {
+          const paidByMember = currentGroup.members.find(m => m.userId === paidBy);
+          notifyNewExpense(
+            currentGroup.name,
+            description.trim(),
+            `${amountNum.toFixed(2)} ${currentGroup.baseCurrency}`,
+            paidByMember?.name || 'Someone'
+          );
+        }
+
         // Reset form
         setDescription('');
         setAmount('');
