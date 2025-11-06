@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAppStore } from '../stores/useAppStore';
 import { useGroupStore } from '../stores/useGroupStore';
@@ -18,12 +18,30 @@ const GroupDashboard: React.FC = () => {
   const [showManageMembers, setShowManageMembers] = useState(false);
   const [showQuickAdd, setShowQuickAdd] = useState(false);
   const [showExportMenu, setShowExportMenu] = useState(false);
+  const exportMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     // Load groups and initialize active group
     loadGroups();
     initializeActiveGroup();
   }, [loadGroups, initializeActiveGroup]);
+
+  // Close export menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (exportMenuRef.current && !exportMenuRef.current.contains(event.target as Node)) {
+        setShowExportMenu(false);
+      }
+    };
+
+    if (showExportMenu) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showExportMenu]);
 
   const currentUserBalance = balances.find(b => b.userId === currentUser?.id);
   const recentExpenses = currentGroup?.expenses.slice(-3) || [];
@@ -94,7 +112,7 @@ const GroupDashboard: React.FC = () => {
           </div>
           <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
             {/* Export Button */}
-            <div style={{ position: 'relative' }}>
+            <div ref={exportMenuRef} style={{ position: 'relative' }}>
               <button
                 onClick={() => setShowExportMenu(!showExportMenu)}
                 style={{
@@ -134,8 +152,12 @@ const GroupDashboard: React.FC = () => {
                   borderRadius: '8px',
                   boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
                   zIndex: 50,
-                  minWidth: '180px'
+                  minWidth: '220px'
                 }}>
+                  {/* Header */}
+                  <div style={{ padding: '8px 16px', borderBottom: '1px solid #e5e7eb', fontSize: '12px', fontWeight: '600', color: '#6b7280' }}>
+                    ALL TIME
+                  </div>
                   <button
                     onClick={() => {
                       if (currentGroup) exportToCSV(currentGroup);
@@ -143,19 +165,18 @@ const GroupDashboard: React.FC = () => {
                     }}
                     style={{
                       width: '100%',
-                      padding: '12px 16px',
+                      padding: '10px 16px',
                       backgroundColor: 'transparent',
                       border: 'none',
                       textAlign: 'left',
                       cursor: 'pointer',
-                      fontSize: '14px',
-                      color: '#1f2937',
-                      borderBottom: '1px solid #e5e7eb'
+                      fontSize: '13px',
+                      color: '#1f2937'
                     }}
                     onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#f9fafb'}
                     onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                   >
-                    📄 Export to CSV
+                    📄 CSV - All Expenses
                   </button>
                   <button
                     onClick={() => {
@@ -164,20 +185,78 @@ const GroupDashboard: React.FC = () => {
                     }}
                     style={{
                       width: '100%',
-                      padding: '12px 16px',
+                      padding: '10px 16px',
                       backgroundColor: 'transparent',
                       border: 'none',
                       textAlign: 'left',
                       cursor: 'pointer',
-                      fontSize: '14px',
+                      fontSize: '13px',
                       color: '#1f2937',
                       borderBottom: '1px solid #e5e7eb'
                     }}
                     onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#f9fafb'}
                     onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                   >
-                    📑 Export to PDF
+                    📑 PDF - All Expenses
                   </button>
+
+                  {/* Last 30 Days */}
+                  <div style={{ padding: '8px 16px', borderBottom: '1px solid #e5e7eb', fontSize: '12px', fontWeight: '600', color: '#6b7280' }}>
+                    LAST 30 DAYS
+                  </div>
+                  <button
+                    onClick={() => {
+                      if (currentGroup) {
+                        const end = new Date();
+                        const start = new Date();
+                        start.setDate(start.getDate() - 30);
+                        exportToCSV(currentGroup, { start, end });
+                      }
+                      setShowExportMenu(false);
+                    }}
+                    style={{
+                      width: '100%',
+                      padding: '10px 16px',
+                      backgroundColor: 'transparent',
+                      border: 'none',
+                      textAlign: 'left',
+                      cursor: 'pointer',
+                      fontSize: '13px',
+                      color: '#1f2937'
+                    }}
+                    onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#f9fafb'}
+                    onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                  >
+                    📄 CSV - Last 30 Days
+                  </button>
+                  <button
+                    onClick={() => {
+                      if (currentGroup) {
+                        const end = new Date();
+                        const start = new Date();
+                        start.setDate(start.getDate() - 30);
+                        exportToPDF(currentGroup, { start, end });
+                      }
+                      setShowExportMenu(false);
+                    }}
+                    style={{
+                      width: '100%',
+                      padding: '10px 16px',
+                      backgroundColor: 'transparent',
+                      border: 'none',
+                      textAlign: 'left',
+                      cursor: 'pointer',
+                      fontSize: '13px',
+                      color: '#1f2937',
+                      borderBottom: '1px solid #e5e7eb'
+                    }}
+                    onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#f9fafb'}
+                    onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                  >
+                    📑 PDF - Last 30 Days
+                  </button>
+
+                  {/* Settlements */}
                   <button
                     onClick={() => {
                       if (currentGroup) exportSettlementsToCSV(currentGroup);
@@ -185,18 +264,18 @@ const GroupDashboard: React.FC = () => {
                     }}
                     style={{
                       width: '100%',
-                      padding: '12px 16px',
+                      padding: '10px 16px',
                       backgroundColor: 'transparent',
                       border: 'none',
                       textAlign: 'left',
                       cursor: 'pointer',
-                      fontSize: '14px',
+                      fontSize: '13px',
                       color: '#1f2937'
                     }}
                     onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#f9fafb'}
                     onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                   >
-                    💰 Export Settlements
+                    💰 Settlements CSV
                   </button>
                 </div>
               )}

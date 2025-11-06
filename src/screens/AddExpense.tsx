@@ -7,6 +7,7 @@ import { Expense, ExpenseSplit } from '../types';
 import { EXPENSE_CATEGORIES } from '../utils/categories';
 import {
   fetchExchangeRates,
+  refreshExchangeRates,
   convertCurrency,
   SUPPORTED_CURRENCIES,
   type ExchangeRates
@@ -623,7 +624,7 @@ const AddExpense: React.FC = () => {
                 >
                   {SUPPORTED_CURRENCIES.map(currency => (
                     <option key={currency.code} value={currency.code}>
-                      {currency.code} - {currency.name}
+                      {currency.symbol} {currency.code} - {currency.name}
                     </option>
                   ))}
                 </select>
@@ -639,8 +640,37 @@ const AddExpense: React.FC = () => {
                 border: '1px solid #dbeafe',
                 borderRadius: '8px'
               }}>
-                <div style={{ fontSize: '13px', color: '#1e40af', marginBottom: '4px' }}>
-                  💱 Converted to base currency:
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                  <div style={{ fontSize: '13px', color: '#1e40af' }}>
+                    💱 Converted to base currency:
+                  </div>
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      setIsLoadingRates(true);
+                      try {
+                        const rates = await refreshExchangeRates(currentGroup.baseCurrency);
+                        setExchangeRates(rates);
+                      } catch (error) {
+                        console.error('Failed to refresh rates:', error);
+                      } finally {
+                        setIsLoadingRates(false);
+                      }
+                    }}
+                    disabled={isLoadingRates}
+                    style={{
+                      padding: '4px 8px',
+                      fontSize: '11px',
+                      backgroundColor: isLoadingRates ? '#cbd5e1' : '#3b82f6',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '4px',
+                      cursor: isLoadingRates ? 'not-allowed' : 'pointer',
+                      fontWeight: '500'
+                    }}
+                  >
+                    {isLoadingRates ? '⟳ Refreshing...' : '🔄 Refresh'}
+                  </button>
                 </div>
                 <div style={{ fontSize: '16px', fontWeight: '600', color: '#1e3a8a' }}>
                   {convertCurrency(
@@ -650,8 +680,13 @@ const AddExpense: React.FC = () => {
                     exchangeRates
                   ).toFixed(2)} {currentGroup.baseCurrency}
                 </div>
-                <div style={{ fontSize: '12px', color: '#60a5fa', marginTop: '4px' }}>
-                  Last updated: {new Date(exchangeRates.lastUpdated).toLocaleString()}
+                <div style={{ fontSize: '12px', color: '#60a5fa', marginTop: '6px', display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                  <div>
+                    Rate: 1 {formData.currency} = {convertCurrency(1, formData.currency, currentGroup.baseCurrency, exchangeRates).toFixed(4)} {currentGroup.baseCurrency}
+                  </div>
+                  <div>
+                    Last updated: {new Date(exchangeRates.lastUpdated).toLocaleString()}
+                  </div>
                 </div>
               </div>
             )}
@@ -801,6 +836,7 @@ const AddExpense: React.FC = () => {
               <ItemizedExpense
                 group={currentGroup}
                 onItemsChange={setLineItems}
+                onTotalChange={(total) => setFormData({ ...formData, amount: total.toFixed(2) })}
                 currency={formData.currency}
               />
               {errors.items && (

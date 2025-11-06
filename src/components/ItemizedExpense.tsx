@@ -11,10 +11,11 @@ export interface LineItem {
 interface ItemizedExpenseProps {
   group: Group;
   onItemsChange: (items: LineItem[]) => void;
+  onTotalChange: (total: number) => void;
   currency: string;
 }
 
-const ItemizedExpense: React.FC<ItemizedExpenseProps> = ({ group, onItemsChange, currency }) => {
+const ItemizedExpense: React.FC<ItemizedExpenseProps> = ({ group, onItemsChange, onTotalChange, currency }) => {
   const [items, setItems] = useState<LineItem[]>([]);
   const [newItemDescription, setNewItemDescription] = useState('');
   const [newItemAmount, setNewItemAmount] = useState('');
@@ -35,6 +36,10 @@ const ItemizedExpense: React.FC<ItemizedExpenseProps> = ({ group, onItemsChange,
     setItems(updatedItems);
     onItemsChange(updatedItems);
 
+    // Update total amount
+    const newTotal = updatedItems.reduce((sum, item) => sum + item.amount, 0);
+    onTotalChange(newTotal);
+
     // Reset inputs
     setNewItemDescription('');
     setNewItemAmount('');
@@ -44,6 +49,10 @@ const ItemizedExpense: React.FC<ItemizedExpenseProps> = ({ group, onItemsChange,
     const updatedItems = items.filter(item => item.id !== itemId);
     setItems(updatedItems);
     onItemsChange(updatedItems);
+
+    // Update total amount
+    const newTotal = updatedItems.reduce((sum, item) => sum + item.amount, 0);
+    onTotalChange(newTotal);
   };
 
   const toggleMemberForItem = (itemId: string, memberId: string) => {

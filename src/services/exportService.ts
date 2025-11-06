@@ -5,9 +5,24 @@ import { formatCurrency } from '../utils/settlements';
 import { getCategoryLabel } from '../utils/categories';
 
 /**
+ * Filter expenses by date range
+ */
+const filterExpensesByDateRange = (
+  expenses: Expense[],
+  dateRange?: { start: Date; end: Date }
+): Expense[] => {
+  if (!dateRange) return expenses;
+
+  return expenses.filter(expense => {
+    const expenseDate = new Date(expense.date);
+    return expenseDate >= dateRange.start && expenseDate <= dateRange.end;
+  });
+};
+
+/**
  * Export expenses to CSV format
  */
-export const exportToCSV = (group: Group): void => {
+export const exportToCSV = (group: Group, dateRange?: { start: Date; end: Date }): void => {
   // CSV Headers
   const headers = [
     'Date',
@@ -20,8 +35,11 @@ export const exportToCSV = (group: Group): void => {
     'Split Between'
   ];
 
+  // Filter expenses by date range
+  const filteredExpenses = filterExpensesByDateRange(group.expenses, dateRange);
+
   // CSV Rows
-  const rows = group.expenses.map(expense => {
+  const rows = filteredExpenses.map(expense => {
     const paidBy = group.members.find(m => m.userId === expense.paidBy);
     const splitMembers = expense.splits
       .map(split => group.members.find(m => m.userId === split.userId)?.name || 'Unknown')
@@ -56,10 +74,13 @@ export const exportToCSV = (group: Group): void => {
 /**
  * Export expenses to PDF format (using HTML and print)
  */
-export const exportToPDF = (group: Group): void => {
+export const exportToPDF = (group: Group, dateRange?: { start: Date; end: Date }): void => {
+  // Filter expenses by date range
+  const filteredExpenses = filterExpensesByDateRange(group.expenses, dateRange);
+
   // Calculate totals
-  const totalSpent = group.expenses.reduce((sum, exp) => sum + exp.baseCurrencyAmount, 0);
-  const expenseCount = group.expenses.length;
+  const totalSpent = filteredExpenses.reduce((sum, exp) => sum + exp.baseCurrencyAmount, 0);
+  const expenseCount = filteredExpenses.length;
 
   // Create HTML content for PDF
   const htmlContent = `
@@ -191,7 +212,7 @@ export const exportToPDF = (group: Group): void => {
       </tr>
     </thead>
     <tbody>
-      ${group.expenses.map(expense => {
+      ${filteredExpenses.map(expense => {
         const paidBy = group.members.find(m => m.userId === expense.paidBy);
         const splitMembers = expense.splits
           .map(split => group.members.find(m => m.userId === split.userId)?.name || 'Unknown')
