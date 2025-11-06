@@ -4,6 +4,7 @@ import Button from '../components/ui/Button';
 import { useAuthStore } from '../stores/useAuthStore';
 import { useGroupStore } from '../stores/useGroupStore';
 import { GroupInviteLink, JoinGroupRequest } from '../types';
+import { getGroups } from '../utils/storage';
 
 const JoinGroupScreen: React.FC = () => {
   const navigate = useNavigate();
@@ -29,40 +30,72 @@ const JoinGroupScreen: React.FC = () => {
     }
 
     if (!inviteCode) {
-      setError('Invalid invite link');
+      setError('Invalid invite link. No invite code provided.');
       return;
     }
 
     // Decode invite information from the invite code
     try {
-      // In a real app, you'd fetch this from your backend
-      // For now, we'll decode basic info from the invite code
       const decoded = parseInviteCode(inviteCode);
       setInviteInfo(decoded);
     } catch (err) {
-      setError('Invalid or expired invite link');
+      const errorMessage = err instanceof Error ? err.message : 'Invalid or expired invite link';
+
+      // If user is already a member, show success message with redirect
+      if (errorMessage.includes('already a member')) {
+        setSuccess('You are already a member of this group! Redirecting...');
+
+        // Get the group ID for redirect
+        const groups = getGroups();
+        const group = groups.find(g => g.inviteCode === inviteCode);
+        if (group) {
+          setTimeout(() => {
+            navigate(`/group/${group.id}`);
+          }, 2000);
+        } else {
+          setTimeout(() => {
+            navigate('/groups');
+          }, 2000);
+        }
+      } else {
+        setError(errorMessage);
+      }
     }
-  }, [isAuthenticated, inviteCode, navigate, location]);
+  }, [isAuthenticated, inviteCode, navigate, location, user]);
 
   const parseInviteCode = (code: string): GroupInviteLink => {
-    // In a real implementation, this would validate against your backend
-    // For demo purposes, we'll parse a basic format
     try {
-      const parts = code.split('_');
-      if (parts.length < 3) throw new Error('Invalid format');
+      // Look up the actual group from storage using the invite code
+      const groups = getGroups();
+      const group = groups.find(g => g.inviteCode === code);
 
-      const [, groupId, timestamp] = parts;
-      const expiresAt = new Date(parseInt(timestamp) + 7 * 24 * 60 * 60 * 1000).toISOString();
+      if (!group) {
+        throw new Error('Group not found. The invite link may be invalid or the group may have been deleted.');
+      }
+
+      // Check if user is already a member
+      if (user && group.members.some(m => m.userId === user.id || m.email === user.email)) {
+        throw new Error('You are already a member of this group!');
+      }
+
+      // Find the inviter (group creator or admin)
+      const inviter = group.members.find(m => m.userId === group.createdBy);
+
+      // Calculate expiry date (7 days from now)
+      const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
 
       return {
-        groupId,
-        groupName: `Group ${groupId.slice(-6)}`, // Placeholder name
+        groupId: group.id,
+        groupName: group.name, // Real group name!
         inviteCode: code,
-        inviterName: 'Group Admin', // Placeholder
+        inviterName: inviter?.name || 'Group Admin', // Real inviter name!
         expiresAt,
         url: window.location.href
       };
-    } catch {
+    } catch (error) {
+      if (error instanceof Error && (error.message.includes('Group not found') || error.message.includes('already a member'))) {
+        throw error;
+      }
       throw new Error('Invalid invite code format');
     }
   };
@@ -86,18 +119,23 @@ const JoinGroupScreen: React.FC = () => {
 
       if (response.success) {
         if (response.requiresApproval) {
-          setSuccess('Join request sent! The group admin will review your request.');
+          setSuccess(`Join request sent to ${inviteInfo.groupName}! The group admin will review your request and you'll be notified once approved.`);
+          // Redirect to groups page after showing success message
+          setTimeout(() => {
+            navigate('/groups');
+          }, 3000);
         } else {
-          setSuccess('Successfully joined the group!');
+          setSuccess(`Successfully joined ${inviteInfo.groupName}!`);
           setTimeout(() => {
             navigate(`/group/${inviteInfo.groupId}`);
           }, 2000);
         }
       } else {
-        setError(response.error || 'Failed to join group');
+        setError(response.error || 'Failed to join group. Please try again or contact the group admin.');
       }
     } catch (err) {
-      setError('An error occurred while joining the group');
+      const errorMessage = err instanceof Error ? err.message : 'An unexpected error occurred';
+      setError(`Unable to join group: ${errorMessage}`);
     } finally {
       setIsJoining(false);
     }
@@ -211,15 +249,36 @@ const JoinGroupScreen: React.FC = () => {
         <div style={{ backgroundColor: 'white', borderRadius: '8px', padding: '20px', marginBottom: '16px', boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)', border: '1px solid #e5e7eb' }}>
           <div style={{ textAlign: 'center' }}>
             <h2 style={{ fontSize: '18px', fontWeight: '500', color: '#1f2937', marginBottom: '8px' }}>{inviteInfo.groupName}</h2>
-            <p style={{ fontSize: '14px', color: '#6b7280', marginBottom: '16px' }}>
+            <p style={{ fontSize: '14px', color: '#6b7280', marginBottom: '12px' }}>
               Invited by {inviteInfo.inviterName}
             </p>
+
+            {/* Group stats */}
+            {(() => {
+              const groups = getGroups();
+              const group = groups.find(g => g.inviteCode === inviteInfo.inviteCode);
+              if (group) {
+                return (
+                  <div style={{ display: 'flex', justifyContent: 'center', gap: '16px', marginBottom: '12px', padding: '12px', backgroundColor: '#f9fafb', borderRadius: '6px' }}>
+                    <div style={{ textAlign: 'center' }}>
+                      <p style={{ fontSize: '18px', fontWeight: '600', color: '#14b8a6' }}>{group.members.length}</p>
+                      <p style={{ fontSize: '12px', color: '#6b7280' }}>Members</p>
+                    </div>
+                    <div style={{ textAlign: 'center' }}>
+                      <p style={{ fontSize: '18px', fontWeight: '600', color: '#14b8a6' }}>{group.baseCurrency}</p>
+                      <p style={{ fontSize: '12px', color: '#6b7280' }}>Currency</p>
+                    </div>
+                  </div>
+                );
+              }
+              return null;
+            })()}
 
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', color: '#6b7280' }}>
               <svg style={{ width: '16px', height: '16px', marginRight: '4px' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              Expires {new Date(inviteInfo.expiresAt).toLocaleDateString()}
+              Invite expires {new Date(inviteInfo.expiresAt).toLocaleDateString()}
             </div>
           </div>
         </div>
