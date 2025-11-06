@@ -7,6 +7,7 @@ import ManageMembers from '../components/forms/ManageMembers';
 import ActivityFeed from '../components/ActivityFeed';
 import QuickAddExpense from '../components/QuickAddExpense';
 import CategoryBadge from '../components/CategoryBadge';
+import SpendingInsights from '../components/SpendingInsights';
 
 const GroupDashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -142,6 +143,16 @@ const GroupDashboard: React.FC = () => {
             )}
           </div>
         </div>
+      </div>
+
+      {/* Spending Insights */}
+      <div style={{
+        margin: '24px 16px',
+        maxWidth: '448px',
+        marginLeft: 'auto',
+        marginRight: 'auto'
+      }}>
+        <SpendingInsights group={currentGroup} userId={currentUser?.id} />
       </div>
 
       {/* Members */}
