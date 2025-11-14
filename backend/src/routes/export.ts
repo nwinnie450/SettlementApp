@@ -1,8 +1,8 @@
 import express, { Request, Response } from 'express';
 import { authenticateToken } from '../middleware/auth';
-import Expense from '../models/Expense';
-import Settlement from '../models/Settlement';
-import Group from '../models/Group';
+import { Expense } from '../models/Expense';
+import { Settlement } from '../models/Settlement';
+import { Group } from '../models/Group';
 import {
   exportExpensesToCSV,
   exportSettlementsToCSV,
