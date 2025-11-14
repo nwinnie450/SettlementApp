@@ -1,7 +1,8 @@
 import express, { Application } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import { connectDatabase } from './config/database';
+// Use development database (with in-memory MongoDB fallback) if MongoDB Atlas is not accessible
+import { connectDatabase, disconnectDatabase } from './config/database-dev';
 import { errorHandler, notFound } from './middleware/errorHandler';
 
 // Import routes
@@ -77,6 +78,19 @@ startServer();
 process.on('unhandledRejection', (error: Error) => {
   console.error('❌ Unhandled Rejection:', error);
   process.exit(1);
+});
+
+// Handle graceful shutdown
+process.on('SIGINT', async () => {
+  console.log('\n🛑 Shutting down gracefully...');
+  await disconnectDatabase();
+  process.exit(0);
+});
+
+process.on('SIGTERM', async () => {
+  console.log('\n🛑 Shutting down gracefully...');
+  await disconnectDatabase();
+  process.exit(0);
 });
 
 export default app;
