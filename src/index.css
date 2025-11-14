@@ -99,7 +99,7 @@
   --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.5);
 }
 
-/* Dark theme - System Preference (fallback) */
+/* Dark theme - System Preference (disabled - using manual toggle only)
 @media (prefers-color-scheme: dark) {
   :root:not(.light) {
     --color-background: #0F172A;
@@ -110,6 +110,7 @@
     --color-text-disabled: #64748B;
   }
 }
+*/
 
 /* CSS Reset and Base Styles */
 *,
