@@ -60,24 +60,24 @@ const CreateGroup: React.FC = () => {
       console.log('Creating group with:', { name: groupName.trim(), currency: selectedCurrency, userId: user.id });
       const group = createGroup(groupName.trim(), selectedCurrency, user.id, user.name, user.email);
       console.log('Group created:', group);
-      
-      // Set as active group
+
+      // Set as active group and navigate
       setCurrentGroup(group.id);
-      
+
       // Debug: Check current state
       console.log('After setting user and group:', {
         currentUser: user,
         activeGroup: group.id,
-        isFirstTime: !user
+        groupsList: useGroupStore.getState().groups.length
       });
-      
-      // Small delay to ensure state updates are processed
+
+      // Delay to ensure Zustand state updates propagate to all components
       setTimeout(() => {
         console.log('Navigating to dashboard...');
-        // Navigate to dashboard - use '/' which will resolve to dashboard for non-first-time users
-        navigate('/', { replace: true });
-      }, 100);
-      
+        // Navigate to dashboard - use '/' which will resolve to dashboard
+        navigate('/dashboard', { replace: true });
+      }, 300); // Increased from 100ms to 300ms
+
     } catch (error) {
       console.error('Error creating group:', error);
       setErrors({ general: `Failed to create group: ${error instanceof Error ? error.message : 'Unknown error'}` });

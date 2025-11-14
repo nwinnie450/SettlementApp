@@ -47,7 +47,7 @@ const Settings: React.FC = () => {
   };
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#f9fafb' }}>
+    <div style={{ backgroundColor: '#f9fafb', paddingBottom: '24px' }}>
       {/* Header */}
       <div style={{ backgroundColor: 'white', padding: '16px', borderBottom: '1px solid #e5e7eb' }}>
         <div style={{ maxWidth: '448px', margin: '0 auto' }}>

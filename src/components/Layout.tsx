@@ -5,14 +5,14 @@ import Header from './Header';
 
 const Layout: React.FC = () => {
   return (
-    <div className="flex flex-col min-h-screen bg-background">
+    <div className="flex flex-col h-screen bg-background overflow-hidden">
       {/* Main content */}
-      <main className="flex-1 overflow-y-auto safe-area-top safe-area-bottom pb-16">
+      <main className="flex-1 overflow-y-auto pb-20">
         <div className="container mx-auto max-w-md px-0">
           <Outlet />
         </div>
       </main>
-      
+
       {/* Bottom navigation */}
       <BottomNavigation />
     </div>
