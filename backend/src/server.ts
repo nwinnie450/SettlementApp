@@ -10,6 +10,8 @@ import authRoutes from './routes/auth';
 import groupRoutes from './routes/groups';
 import expenseRoutes from './routes/expenses';
 import settlementRoutes from './routes/settlements';
+import uploadRoutes from './routes/upload';
+import exportRoutes from './routes/export';
 
 // Load environment variables
 dotenv.config();
@@ -41,6 +43,8 @@ app.use('/api/auth', authRoutes);
 app.use('/api/groups', groupRoutes);
 app.use('/api/expenses', expenseRoutes);
 app.use('/api/settlements', settlementRoutes);
+app.use('/api/upload', uploadRoutes);
+app.use('/api/export', exportRoutes);
 
 // 404 handler
 app.use(notFound);
