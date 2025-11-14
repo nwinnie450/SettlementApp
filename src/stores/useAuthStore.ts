@@ -8,6 +8,7 @@ import {
   PasswordResetRequest,
   PasswordResetData
 } from '../types';
+import { api, ApiError, setAuthToken as setApiAuthToken, getAuthToken } from '../services/api';
 
 interface AuthState {
   // State
@@ -22,7 +23,7 @@ interface AuthState {
   register: (credentials: RegisterCredentials) => Promise<boolean>;
   logout: () => void;
   clearError: () => void;
-  updateUser: (updates: Partial<AuthUser>) => void;
+  updateUser: (updates: Partial<AuthUser>) => Promise<void>;
 
   // Password reset
   requestPasswordReset: (data: PasswordResetRequest) => Promise<boolean>;
@@ -114,92 +115,67 @@ const clearStoredAuth = (): void => {
   localStorage.removeItem(AUTH_STORAGE_KEY);
 };
 
-// Simulated API functions
+// Real API functions
 const apiLogin = async (credentials: LoginCredentials): Promise<AuthResponse> => {
-  // Simulate network delay
-  await new Promise(resolve => setTimeout(resolve, 1000));
+  try {
+    const response = await api.auth.login(credentials.email, credentials.password);
 
-  const users = getStoredUsers();
-  const user = users.find(u => u.email.toLowerCase() === credentials.email.toLowerCase());
+    const authUser: AuthUser = {
+      id: response.user.id,
+      email: response.user.email,
+      name: response.user.name,
+      avatar: undefined,
+      defaultCurrency: response.user.defaultCurrency,
+      isEmailVerified: false,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
 
-  if (!user) {
-    return { success: false, error: 'User not found' };
+    return {
+      success: true,
+      user: authUser,
+      token: response.token,
+      message: response.message || 'Login successful'
+    };
+  } catch (error) {
+    if (error instanceof ApiError) {
+      return { success: false, error: error.message };
+    }
+    return { success: false, error: 'An unexpected error occurred' };
   }
-
-  const passwordHash = hashPassword(credentials.password);
-  if (user.passwordHash !== passwordHash) {
-    return { success: false, error: 'Invalid password' };
-  }
-
-  const authUser: AuthUser = {
-    id: user.id,
-    email: user.email,
-    name: user.name,
-    avatar: user.avatar,
-    defaultCurrency: user.defaultCurrency,
-    isEmailVerified: user.isEmailVerified,
-    createdAt: user.createdAt,
-    updatedAt: user.updatedAt
-  };
-
-  const token = generateToken();
-  const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(); // 7 days
-
-  return {
-    success: true,
-    user: authUser,
-    token,
-    message: 'Login successful'
-  };
 };
 
 const apiRegister = async (credentials: RegisterCredentials): Promise<AuthResponse> => {
-  // Simulate network delay
-  await new Promise(resolve => setTimeout(resolve, 1000));
+  try {
+    const response = await api.auth.register(
+      credentials.email,
+      credentials.name,
+      credentials.password
+    );
 
-  const users = getStoredUsers();
+    const authUser: AuthUser = {
+      id: response.user.id,
+      email: response.user.email,
+      name: response.user.name,
+      avatar: undefined,
+      defaultCurrency: response.user.defaultCurrency,
+      isEmailVerified: false,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
 
-  // Check if user already exists
-  if (users.some(u => u.email.toLowerCase() === credentials.email.toLowerCase())) {
-    return { success: false, error: 'An account with this email already exists' };
+    return {
+      success: true,
+      user: authUser,
+      token: response.token,
+      message: response.message || 'Registration successful'
+    };
+  } catch (error) {
+    if (error instanceof ApiError) {
+      return { success: false, error: error.message };
+    }
+    return { success: false, error: 'An unexpected error occurred' };
   }
-
-  const userId = generateUserId();
-  const now = new Date().toISOString();
-
-  const newStoredUser: StoredUser = {
-    id: userId,
-    email: credentials.email.toLowerCase(),
-    name: credentials.name.trim(),
-    passwordHash: hashPassword(credentials.password),
-    defaultCurrency: credentials.defaultCurrency,
-    isEmailVerified: false,
-    createdAt: now,
-    updatedAt: now
-  };
-
-  users.push(newStoredUser);
-  saveStoredUsers(users);
-
-  const authUser: AuthUser = {
-    id: newStoredUser.id,
-    email: newStoredUser.email,
-    name: newStoredUser.name,
-    avatar: newStoredUser.avatar,
-    defaultCurrency: newStoredUser.defaultCurrency,
-    isEmailVerified: newStoredUser.isEmailVerified,
-    createdAt: newStoredUser.createdAt,
-    updatedAt: newStoredUser.updatedAt
-  };
-
-  const token = generateToken();
-
-  return {
-    success: true,
-    user: authUser,
-    token,
-    message: 'Registration successful'
-  };
 };
 
 export const useAuthStore = create<AuthState>((set, get) => ({
@@ -293,6 +269,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   logout: () => {
     clearStoredAuth();
+    setApiAuthToken(null); // Clear API token
     set({
       user: null,
       isAuthenticated: false,
@@ -305,34 +282,37 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     set({ error: null });
   },
 
-  updateUser: (updates: Partial<AuthUser>) => {
+  updateUser: async (updates: Partial<AuthUser>) => {
     const { user } = get();
     if (!user) return;
 
-    const updatedUser = { ...user, ...updates, updatedAt: new Date().toISOString() };
+    try {
+      const response = await api.auth.updateProfile({
+        name: updates.name,
+        defaultCurrency: updates.defaultCurrency,
+        avatar: updates.avatar,
+      });
 
-    // Update stored auth
-    const storedAuth = getStoredAuth();
-    if (storedAuth) {
-      storedAuth.user = updatedUser;
-      saveStoredAuth(storedAuth);
-    }
-
-    // Update stored users
-    const users = getStoredUsers();
-    const userIndex = users.findIndex(u => u.id === user.id);
-    if (userIndex !== -1) {
-      users[userIndex] = {
-        ...users[userIndex],
-        name: updatedUser.name,
-        defaultCurrency: updatedUser.defaultCurrency,
-        avatar: updatedUser.avatar,
-        updatedAt: updatedUser.updatedAt
+      const updatedUser: AuthUser = {
+        ...user,
+        ...updates,
+        updatedAt: new Date().toISOString()
       };
-      saveStoredUsers(users);
-    }
 
-    set({ user: updatedUser });
+      // Update stored auth
+      const storedAuth = getStoredAuth();
+      if (storedAuth) {
+        storedAuth.user = updatedUser;
+        saveStoredAuth(storedAuth);
+      }
+
+      set({ user: updatedUser });
+    } catch (error) {
+      console.error('Failed to update user:', error);
+      // Still update locally even if API fails (optimistic update)
+      const updatedUser = { ...user, ...updates, updatedAt: new Date().toISOString() };
+      set({ user: updatedUser });
+    }
   },
 
   requestPasswordReset: async (data: PasswordResetRequest) => {
