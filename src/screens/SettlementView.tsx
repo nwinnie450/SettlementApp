@@ -1,8 +1,9 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useAppStore } from '../stores/useAppStore';
 import { useGroupStore } from '../stores/useGroupStore';
 import { formatCurrency, isGroupSettled, calculateOptimalPayments } from '../utils/settlements';
 import { SettlementStatus } from '../types';
+import Confetti from '../components/Confetti';
 
 const SettlementView: React.FC = () => {
   const { currentUser } = useAppStore();
@@ -22,6 +23,7 @@ const SettlementView: React.FC = () => {
   const [availableCurrencies, setAvailableCurrencies] = React.useState<string[]>([]);
   const [selectedSettlementCurrency, setSelectedSettlementCurrency] = React.useState<string>('');
   const [showSimplified, setShowSimplified] = React.useState(false);
+  const [showConfetti, setShowConfetti] = useState(false);
 
   // Simple currency conversion rates (in a real app, this would be fetched from an API)
   const exchangeRates: Record<string, Record<string, number>> = {
@@ -114,6 +116,14 @@ const SettlementView: React.FC = () => {
     }
   }, [selectedSettlementCurrency, currentGroup, optimalPaymentsByCurrency]);
 
+  // Show confetti when group becomes fully settled
+  useEffect(() => {
+    if (isSettled && balances.length > 0) {
+      setShowConfetti(true);
+      setTimeout(() => setShowConfetti(false), 3000);
+    }
+  }, [isSettled, balances]);
+
   // Note: No need to reset processed payments since we now check settlements directly from database
 
   const handleCalculateSettlements = () => {
@@ -174,19 +184,23 @@ const SettlementView: React.FC = () => {
       const success = await markSettlementPaid(currentGroup.id, fromUserId, toUserId, amount, currency);
       if (success) {
         console.log('Settlement marked successfully, recalculating...');
+        // Trigger confetti celebration
+        setShowConfetti(true);
+        setTimeout(() => setShowConfetti(false), 3000);
+
         // Don't call recalculateAll immediately since markSettlementPaid already calls calculateSettlements
         // Just wait for the store to update and then refresh multi-currency calculations
         setTimeout(() => {
           // Recalculate both single currency and multi-currency settlements
           calculateSettlements(currentGroup.id);
-          
+
           const balancesByCurrency = refreshBalancesByCurrency(currentGroup.id);
           const paymentsByCurrency: Record<string, any[]> = {};
-          
+
           Object.entries(balancesByCurrency).forEach(([currency, balances]) => {
             paymentsByCurrency[currency] = calculateOptimalPayments(balances);
           });
-          
+
           setOptimalPaymentsByCurrency(paymentsByCurrency);
         }, 200); // Increased timeout to ensure store update completes
       }
@@ -257,12 +271,6 @@ const SettlementView: React.FC = () => {
                 fontSize: '12px',
                 fontWeight: '500',
                 cursor: isCalculatingSettlements ? 'not-allowed' : 'pointer'
-              }}
-              onMouseOver={(e) => {
-                if (!isCalculatingSettlements) (e.target as HTMLButtonElement).style.backgroundColor = '#0d9488';
-              }}
-              onMouseOut={(e) => {
-                if (!isCalculatingSettlements) (e.target as HTMLButtonElement).style.backgroundColor = '#14b8a6';
               }}
               onMouseOver={(e) => {
                 if (!isCalculatingSettlements) (e.target as HTMLButtonElement).style.backgroundColor = 'var(--color-primary-dark)';
@@ -760,6 +768,9 @@ const SettlementView: React.FC = () => {
         )}
       </div>
       </div>
+
+      {/* Confetti celebration for settlements */}
+      {showConfetti && <Confetti />}
     </>
   );
 };

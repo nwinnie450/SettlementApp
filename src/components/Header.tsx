@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../stores/useAuthStore';
+import NotificationCenter from './NotificationCenter';
 
 const Header: React.FC = () => {
   const location = useLocation();
@@ -64,8 +65,13 @@ const Header: React.FC = () => {
             {getPageTitle(location.pathname)}
           </h1>
 
-          {/* User menu */}
-          <div className="relative">
+          {/* Right side - Notifications and User menu */}
+          <div className="flex items-center space-x-2">
+            {/* Notification Center */}
+            <NotificationCenter />
+
+            {/* User menu */}
+            <div className="relative">
             <button
               onClick={() => setShowUserMenu(!showUserMenu)}
               className="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center text-sm font-medium hover:bg-primary-dark transition"
@@ -108,6 +114,7 @@ const Header: React.FC = () => {
                 </div>
               </div>
             )}
+            </div>
           </div>
 
           {/* Overlay to close menu */}

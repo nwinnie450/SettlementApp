@@ -8,6 +8,8 @@ import { useAppStore } from '../stores/useAppStore';
 import { useGroupStore } from '../stores/useGroupStore';
 import { Expense } from '../types';
 import { formatCurrency } from '../utils/settlements';
+import { EXPENSE_CATEGORIES } from '../utils/categories';
+import CategoryBadge from '../components/CategoryBadge';
 
 type FilterType = 'all' | 'pending' | 'settled';
 type SortType = 'date' | 'amount' | 'description';
@@ -26,15 +28,13 @@ const ExpenseList: React.FC = () => {
   const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
   const [isRecalculating, setIsRecalculating] = useState(false);
 
+  // Use centralized categories
   const categories = [
     { value: 'all', label: '🔍 All Categories' },
-    { value: 'food', label: '🍕 Food & Dining' },
-    { value: 'transport', label: '🚗 Transportation' },
-    { value: 'accommodation', label: '🏨 Accommodation' },
-    { value: 'entertainment', label: '🎬 Entertainment' },
-    { value: 'shopping', label: '🛍️ Shopping' },
-    { value: 'utilities', label: '⚡ Utilities' },
-    { value: 'general', label: '📝 General' }
+    ...EXPENSE_CATEGORIES.map(cat => ({
+      value: cat.id,
+      label: `${cat.icon} ${cat.label}`
+    }))
   ];
 
   const filteredAndSortedExpenses = useMemo(() => {
@@ -431,15 +431,9 @@ const ExpenseList: React.FC = () => {
                           <p style={{ fontSize: '18px', fontWeight: '600', color: '#1f2937', margin: 0 }}>
                             {formatCurrency(expense.amount, expense.currency)}
                           </p>
-                          <p style={{ 
-                            fontSize: '12px', 
-                            color: '#6b7280',
-                            margin: 0,
-                            textTransform: 'uppercase',
-                            letterSpacing: '0.5px'
-                          }}>
-                            {getCategoryLabel(expense.category)}
-                          </p>
+                          <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '4px' }}>
+                            {expense.category && <CategoryBadge categoryId={expense.category} size="small" showLabel={true} />}
+                          </div>
                         </div>
                         
                         {/* Action Buttons */}

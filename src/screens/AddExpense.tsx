@@ -4,8 +4,19 @@ import ManageMembers from '../components/forms/ManageMembers';
 import { useAppStore } from '../stores/useAppStore';
 import { useGroupStore } from '../stores/useGroupStore';
 import { Expense, ExpenseSplit } from '../types';
+import { EXPENSE_CATEGORIES } from '../utils/categories';
+import {
+  fetchExchangeRates,
+  refreshExchangeRates,
+  convertCurrency,
+  SUPPORTED_CURRENCIES,
+  type ExchangeRates
+} from '../services/exchangeRateService';
+import ItemizedExpense, { type LineItem } from '../components/ItemizedExpense';
+import { notifyNewExpense, areNotificationsEnabled } from '../services/browserNotifications';
+import DragDropPhotoUpload from '../components/DragDropPhotoUpload';
 
-type SplitType = 'equal' | 'custom' | 'percentage';
+type SplitType = 'equal' | 'custom' | 'percentage' | 'items';
 
 const AddExpense: React.FC = () => {
   const navigate = useNavigate();
@@ -31,27 +42,45 @@ const AddExpense: React.FC = () => {
   const [showManageMembers, setShowManageMembers] = useState(false);
   const [editingMember, setEditingMember] = useState<string | null>(null);
   const [editName, setEditName] = useState('');
+  const [exchangeRates, setExchangeRates] = useState<ExchangeRates | null>(null);
+  const [isLoadingRates, setIsLoadingRates] = useState(false);
+  const [lineItems, setLineItems] = useState<LineItem[]>([]);
 
-  const categories = [
-    { value: 'food', label: '🍕 Food & Dining' },
-    { value: 'transport', label: '🚗 Transportation' },
-    { value: 'accommodation', label: '🏨 Accommodation' },
-    { value: 'entertainment', label: '🎬 Entertainment' },
-    { value: 'shopping', label: '🛍️ Shopping' },
-    { value: 'utilities', label: '⚡ Utilities' },
-    { value: 'general', label: '📝 General' }
-  ];
+  // Use categories from centralized config
+  const categories = EXPENSE_CATEGORIES.map(cat => ({
+    value: cat.id,
+    label: `${cat.icon} ${cat.label}`
+  }));
 
   useEffect(() => {
     if (!currentGroup || !currentUser) {
       navigate('/dashboard');
       return;
     }
-    
+
     // Initialize with all active members selected by default
     const activeMemberIds = new Set(currentGroup.members.filter(m => m.isActive).map(m => m.userId));
     setSelectedMembers(activeMemberIds);
   }, [currentGroup, currentUser, navigate]);
+
+  // Fetch exchange rates on mount
+  useEffect(() => {
+    if (!currentGroup) return;
+
+    const loadRates = async () => {
+      setIsLoadingRates(true);
+      try {
+        const rates = await fetchExchangeRates(currentGroup.baseCurrency);
+        setExchangeRates(rates);
+      } catch (error) {
+        console.error('Failed to load exchange rates:', error);
+      } finally {
+        setIsLoadingRates(false);
+      }
+    };
+
+    loadRates();
+  }, [currentGroup]);
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
@@ -65,8 +94,21 @@ const AddExpense: React.FC = () => {
       newErrors.amount = 'Valid amount is required';
     }
     
-    if (selectedMembers.size === 0) {
+    if (splitType !== 'items' && selectedMembers.size === 0) {
       newErrors.members = 'Select at least one member';
+    }
+
+    // Validate items split
+    if (splitType === 'items') {
+      if (lineItems.length === 0) {
+        newErrors.items = 'Add at least one item';
+      } else {
+        // Check that all items have at least one member selected
+        const hasInvalidItem = lineItems.some(item => item.selectedMembers.size === 0);
+        if (hasInvalidItem) {
+          newErrors.items = 'Each item must have at least one member selected';
+        }
+      }
     }
     
     if (!formData.paidBy) {
@@ -102,10 +144,34 @@ const AddExpense: React.FC = () => {
   const calculateSplits = (): ExpenseSplit[] => {
     const amount = parseFloat(formData.amount);
     const memberCount = selectedMembers.size;
-    
+
+    // For itemized split, calculate based on line items
+    if (splitType === 'items') {
+      const memberTotals: Record<string, number> = {};
+
+      // Calculate each member's total from line items
+      lineItems.forEach(item => {
+        const splitCount = item.selectedMembers.size;
+        if (splitCount > 0) {
+          const perPersonAmount = item.amount / splitCount;
+          item.selectedMembers.forEach(memberId => {
+            memberTotals[memberId] = (memberTotals[memberId] || 0) + perPersonAmount;
+          });
+        }
+      });
+
+      // Convert to splits array
+      return Object.entries(memberTotals).map(([userId, splitAmount]) => ({
+        userId,
+        amount: splitAmount,
+        percentage: amount > 0 ? (splitAmount / amount) * 100 : 0
+      }));
+    }
+
+    // Regular split types
     return Array.from(selectedMembers).map(memberId => {
       let splitAmount: number;
-      
+
       switch (splitType) {
         case 'equal':
           splitAmount = amount / memberCount;
@@ -120,7 +186,7 @@ const AddExpense: React.FC = () => {
         default:
           splitAmount = 0;
       }
-      
+
       return {
         userId: memberId,
         amount: splitAmount,
@@ -138,13 +204,26 @@ const AddExpense: React.FC = () => {
     setIsSubmitting(true);
     
     try {
+      const expenseAmount = parseFloat(formData.amount);
+
+      // Convert to base currency if needed
+      let baseCurrencyAmount = expenseAmount;
+      if (formData.currency !== currentGroup.baseCurrency && exchangeRates) {
+        baseCurrencyAmount = convertCurrency(
+          expenseAmount,
+          formData.currency,
+          currentGroup.baseCurrency,
+          exchangeRates
+        );
+      }
+
       const expense: Expense = {
         id: Date.now().toString(),
         groupId: currentGroup.id,
         description: formData.description.trim(),
-        amount: parseFloat(formData.amount),
+        amount: expenseAmount,
         currency: formData.currency,
-        baseCurrencyAmount: parseFloat(formData.amount), // TODO: Convert with exchange rate
+        baseCurrencyAmount: baseCurrencyAmount,
         category: formData.category,
         date: new Date(formData.date).toISOString(),
         paidBy: formData.paidBy,
@@ -153,8 +232,20 @@ const AddExpense: React.FC = () => {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
       };
-      
+
       await addExpense(expense);
+
+      // Send browser notification if enabled
+      if (areNotificationsEnabled()) {
+        const paidByMember = currentGroup.members.find(m => m.userId === formData.paidBy);
+        notifyNewExpense(
+          currentGroup.name,
+          formData.description.trim(),
+          `${expenseAmount.toFixed(2)} ${formData.currency}`,
+          paidByMember?.name || 'Someone'
+        );
+      }
+
       navigate('/dashboard');
     } catch (error) {
       setErrors({ submit: 'Failed to add expense. Please try again.' });
@@ -298,69 +389,6 @@ const AddExpense: React.FC = () => {
           <div style={{ backgroundColor: 'white', borderRadius: '8px', padding: '20px', marginBottom: '16px', boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)', border: '1px solid #e5e7eb' }}>
             <h3 style={{ fontSize: '16px', fontWeight: '500', color: '#1f2937', marginBottom: '16px' }}>Expense details</h3>
             
-            {/* Photo attachment */}
-            <div style={{ marginBottom: '16px' }}>
-              <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#1f2937', marginBottom: '6px' }}>
-                📸 Photo (Optional)
-              </label>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (file) {
-                    const reader = new FileReader();
-                    reader.onload = () => {
-                      setFormData({ ...formData, photo: reader.result as string });
-                    };
-                    reader.readAsDataURL(file);
-                  }
-                }}
-                style={{
-                  width: '100%',
-                  padding: '12px',
-                  fontSize: '14px',
-                  border: '1px solid #e5e7eb',
-                  borderRadius: '6px',
-                  outline: 'none',
-                  backgroundColor: 'white',
-                  color: '#1f2937'
-                }}
-                onFocus={(e) => e.target.style.borderColor = '#14b8a6'}
-                onBlur={(e) => e.target.style.borderColor = 'var(--color-border)'}
-              />
-              {formData.photo && (
-                <div style={{ marginTop: '8px' }}>
-                  <img 
-                    src={formData.photo} 
-                    alt="Expense receipt" 
-                    style={{ 
-                      maxWidth: '200px', 
-                      maxHeight: '150px', 
-                      objectFit: 'cover',
-                      borderRadius: '6px',
-                      border: '1px solid #e5e7eb'
-                    }} 
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setFormData({ ...formData, photo: null })}
-                    style={{
-                      marginLeft: '8px',
-                      padding: '4px 8px',
-                      backgroundColor: '#ef4444',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '4px',
-                      fontSize: '12px',
-                      cursor: 'pointer'
-                    }}
-                  >
-                    Remove
-                  </button>
-                </div>
-              )}
-            </div>
             
             <div style={{ marginBottom: '16px' }}>
               <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#374151', marginBottom: '6px' }}>
@@ -415,7 +443,20 @@ const AddExpense: React.FC = () => {
                 ))}
               </select>
             </div>
-            
+
+            {/* Receipt Photo Upload */}
+            <div style={{ marginBottom: '16px' }}>
+              <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#1f2937', marginBottom: '8px' }}>
+                📸 Receipt Photo (Optional)
+              </label>
+              <DragDropPhotoUpload
+                onPhotoSelect={(photoDataUrl) => setFormData({ ...formData, photo: photoDataUrl })}
+                currentPhoto={formData.photo}
+                onRemovePhoto={() => setFormData({ ...formData, photo: null })}
+                maxSizeMB={2}
+              />
+            </div>
+
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
               <div>
                 <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#1f2937', marginBottom: '6px' }}>
@@ -463,16 +504,74 @@ const AddExpense: React.FC = () => {
                   onFocus={(e) => e.target.style.borderColor = 'var(--color-primary)'}
                   onBlur={(e) => e.target.style.borderColor = 'var(--color-border)'}
                 >
-                  <option value="SGD">SGD</option>
-                  <option value="MYR">MYR</option>
-                  <option value="CNY">CNY</option>
-                  <option value="USD">USD</option>
-                  <option value="EUR">EUR</option>
-                  <option value="GBP">GBP</option>
-                  <option value="JPY">JPY</option>
+                  {SUPPORTED_CURRENCIES.map(currency => (
+                    <option key={currency.code} value={currency.code}>
+                      {currency.symbol} {currency.code} - {currency.name}
+                    </option>
+                  ))}
                 </select>
               </div>
             </div>
+
+            {/* Currency conversion info */}
+            {formData.currency !== currentGroup.baseCurrency && exchangeRates && formData.amount && (
+              <div style={{
+                marginTop: '12px',
+                padding: '12px',
+                backgroundColor: '#eff6ff',
+                border: '1px solid #dbeafe',
+                borderRadius: '8px'
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                  <div style={{ fontSize: '13px', color: '#1e40af' }}>
+                    💱 Converted to base currency:
+                  </div>
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      setIsLoadingRates(true);
+                      try {
+                        const rates = await refreshExchangeRates(currentGroup.baseCurrency);
+                        setExchangeRates(rates);
+                      } catch (error) {
+                        console.error('Failed to refresh rates:', error);
+                      } finally {
+                        setIsLoadingRates(false);
+                      }
+                    }}
+                    disabled={isLoadingRates}
+                    style={{
+                      padding: '4px 8px',
+                      fontSize: '11px',
+                      backgroundColor: isLoadingRates ? '#cbd5e1' : '#3b82f6',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '4px',
+                      cursor: isLoadingRates ? 'not-allowed' : 'pointer',
+                      fontWeight: '500'
+                    }}
+                  >
+                    {isLoadingRates ? '⟳ Refreshing...' : '🔄 Refresh'}
+                  </button>
+                </div>
+                <div style={{ fontSize: '16px', fontWeight: '600', color: '#1e3a8a' }}>
+                  {convertCurrency(
+                    parseFloat(formData.amount),
+                    formData.currency,
+                    currentGroup.baseCurrency,
+                    exchangeRates
+                  ).toFixed(2)} {currentGroup.baseCurrency}
+                </div>
+                <div style={{ fontSize: '12px', color: '#60a5fa', marginTop: '6px', display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                  <div>
+                    Rate: 1 {formData.currency} = {convertCurrency(1, formData.currency, currentGroup.baseCurrency, exchangeRates).toFixed(4)} {currentGroup.baseCurrency}
+                  </div>
+                  <div>
+                    Last updated: {new Date(exchangeRates.lastUpdated).toLocaleString()}
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Who paid */}
@@ -542,10 +641,99 @@ const AddExpense: React.FC = () => {
             </div>
           </div>
 
-          {/* Split between */}
+          {/* Split Type Selector */}
           <div style={{ backgroundColor: 'white', borderRadius: '8px', padding: '20px', marginBottom: '16px', boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)', border: '1px solid #e5e7eb' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
-              <h3 style={{ fontSize: '16px', fontWeight: '500', color: '#1f2937' }}>Split between</h3>
+            <h3 style={{ fontSize: '16px', fontWeight: '500', color: '#1f2937', marginBottom: '12px' }}>How to split?</h3>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '8px' }}>
+              <button
+                type="button"
+                onClick={() => setSplitType('equal')}
+                style={{
+                  padding: '12px',
+                  border: splitType === 'equal' ? '2px solid #14b8a6' : '1px solid #e5e7eb',
+                  borderRadius: '8px',
+                  backgroundColor: splitType === 'equal' ? '#f0fdfa' : 'white',
+                  cursor: 'pointer',
+                  fontSize: '14px',
+                  fontWeight: splitType === 'equal' ? '500' : '400',
+                  color: splitType === 'equal' ? '#14b8a6' : '#6b7280'
+                }}
+              >
+                ⚖️ Equal Split
+              </button>
+              <button
+                type="button"
+                onClick={() => setSplitType('custom')}
+                style={{
+                  padding: '12px',
+                  border: splitType === 'custom' ? '2px solid #14b8a6' : '1px solid #e5e7eb',
+                  borderRadius: '8px',
+                  backgroundColor: splitType === 'custom' ? '#f0fdfa' : 'white',
+                  cursor: 'pointer',
+                  fontSize: '14px',
+                  fontWeight: splitType === 'custom' ? '500' : '400',
+                  color: splitType === 'custom' ? '#14b8a6' : '#6b7280'
+                }}
+              >
+                💵 Custom Amounts
+              </button>
+              <button
+                type="button"
+                onClick={() => setSplitType('percentage')}
+                style={{
+                  padding: '12px',
+                  border: splitType === 'percentage' ? '2px solid #14b8a6' : '1px solid #e5e7eb',
+                  borderRadius: '8px',
+                  backgroundColor: splitType === 'percentage' ? '#f0fdfa' : 'white',
+                  cursor: 'pointer',
+                  fontSize: '14px',
+                  fontWeight: splitType === 'percentage' ? '500' : '400',
+                  color: splitType === 'percentage' ? '#14b8a6' : '#6b7280'
+                }}
+              >
+                📊 Percentage
+              </button>
+              <button
+                type="button"
+                onClick={() => setSplitType('items')}
+                style={{
+                  padding: '12px',
+                  border: splitType === 'items' ? '2px solid #14b8a6' : '1px solid #e5e7eb',
+                  borderRadius: '8px',
+                  backgroundColor: splitType === 'items' ? '#f0fdfa' : 'white',
+                  cursor: 'pointer',
+                  fontSize: '14px',
+                  fontWeight: splitType === 'items' ? '500' : '400',
+                  color: splitType === 'items' ? '#14b8a6' : '#6b7280'
+                }}
+              >
+                🛒 By Items
+              </button>
+            </div>
+          </div>
+
+          {/* Itemized Split */}
+          {splitType === 'items' && (
+            <>
+              <ItemizedExpense
+                group={currentGroup}
+                onItemsChange={setLineItems}
+                onTotalChange={(total) => setFormData({ ...formData, amount: total.toFixed(2) })}
+                currency={formData.currency}
+              />
+              {errors.items && (
+                <div style={{ padding: '12px', marginBottom: '16px', backgroundColor: '#fef2f2', border: '1px solid #fecaca', borderRadius: '8px' }}>
+                  <p style={{ color: '#dc2626', fontSize: '14px', margin: 0 }}>{errors.items}</p>
+                </div>
+              )}
+            </>
+          )}
+
+          {/* Split between - Show for non-items split types */}
+          {splitType !== 'items' && (
+            <div style={{ backgroundColor: 'white', borderRadius: '8px', padding: '20px', marginBottom: '16px', boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)', border: '1px solid #e5e7eb' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+                <h3 style={{ fontSize: '16px', fontWeight: '500', color: '#1f2937' }}>Split between</h3>
               <button
                 type="button"
                 onClick={() => setShowManageMembers(true)}
@@ -710,6 +898,7 @@ const AddExpense: React.FC = () => {
               )}
             </div>
           </div>
+          )}
 
           {/* Split details */}
           {selectedMembers.size > 0 && (

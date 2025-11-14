@@ -1,21 +1,47 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAppStore } from '../stores/useAppStore';
 import { useGroupStore } from '../stores/useGroupStore';
 import { formatCurrency } from '../utils/settlements';
 import ManageMembers from '../components/forms/ManageMembers';
+import ActivityFeed from '../components/ActivityFeed';
+import QuickAddExpense from '../components/QuickAddExpense';
+import CategoryBadge from '../components/CategoryBadge';
+import SpendingInsights from '../components/SpendingInsights';
+import { exportToCSV, exportToPDF, exportSettlementsToCSV } from '../services/exportService';
+import NotificationSettings from '../components/NotificationSettings';
 
 const GroupDashboard: React.FC = () => {
   const navigate = useNavigate();
   const { currentUser } = useAppStore();
   const { currentGroup, balances, loadGroups, initializeActiveGroup } = useGroupStore();
   const [showManageMembers, setShowManageMembers] = useState(false);
+  const [showQuickAdd, setShowQuickAdd] = useState(false);
+  const [showExportMenu, setShowExportMenu] = useState(false);
+  const exportMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     // Load groups and initialize active group
     loadGroups();
     initializeActiveGroup();
   }, [loadGroups, initializeActiveGroup]);
+
+  // Close export menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (exportMenuRef.current && !exportMenuRef.current.contains(event.target as Node)) {
+        setShowExportMenu(false);
+      }
+    };
+
+    if (showExportMenu) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showExportMenu]);
 
   const currentUserBalance = balances.find(b => b.userId === currentUser?.id);
   const recentExpenses = currentGroup?.expenses.slice(-3) || [];
@@ -84,60 +110,333 @@ const GroupDashboard: React.FC = () => {
               {currentGroup?.members?.filter(m => m.isActive).length || 0} members • {currentGroup?.baseCurrency}
             </p>
           </div>
-          <button
-            onClick={() => navigate('/groups')}
-            style={{
-              padding: '8px 12px',
-              backgroundColor: 'transparent',
-              color: '#6b7280',
-              border: '1px solid #e5e7eb',
-              borderRadius: '6px',
-              fontSize: '12px',
-              fontWeight: '500',
-              cursor: 'pointer'
-            }}
-            onMouseOver={(e) => {
-              e.target.style.backgroundColor = '#f3f4f6';
-              e.target.style.color = '#14b8a6';
-            }}
-            onMouseOut={(e) => {
-              e.target.style.backgroundColor = 'transparent';
-              e.target.style.color = '#6b7280';
-            }}
-          >
-            Switch Group
-          </button>
+          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+            {/* Export Button */}
+            <div ref={exportMenuRef} style={{ position: 'relative' }}>
+              <button
+                onClick={() => setShowExportMenu(!showExportMenu)}
+                style={{
+                  padding: '8px 12px',
+                  backgroundColor: 'transparent',
+                  color: '#6b7280',
+                  border: '1px solid #e5e7eb',
+                  borderRadius: '6px',
+                  fontSize: '12px',
+                  fontWeight: '500',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px'
+                }}
+                onMouseOver={(e) => {
+                  e.currentTarget.style.backgroundColor = '#f3f4f6';
+                  e.currentTarget.style.color = '#14b8a6';
+                }}
+                onMouseOut={(e) => {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                  e.currentTarget.style.color = '#6b7280';
+                }}
+              >
+                📥 Export
+              </button>
+
+              {/* Export Dropdown */}
+              {showExportMenu && (
+                <div style={{
+                  position: 'absolute',
+                  top: '100%',
+                  right: 0,
+                  marginTop: '8px',
+                  backgroundColor: 'white',
+                  border: '1px solid #e5e7eb',
+                  borderRadius: '8px',
+                  boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+                  zIndex: 50,
+                  minWidth: '220px'
+                }}>
+                  {/* Header */}
+                  <div style={{ padding: '8px 16px', borderBottom: '1px solid #e5e7eb', fontSize: '12px', fontWeight: '600', color: '#6b7280' }}>
+                    ALL TIME
+                  </div>
+                  <button
+                    onClick={() => {
+                      if (currentGroup) exportToCSV(currentGroup);
+                      setShowExportMenu(false);
+                    }}
+                    style={{
+                      width: '100%',
+                      padding: '10px 16px',
+                      backgroundColor: 'transparent',
+                      border: 'none',
+                      textAlign: 'left',
+                      cursor: 'pointer',
+                      fontSize: '13px',
+                      color: '#1f2937'
+                    }}
+                    onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#f9fafb'}
+                    onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                  >
+                    📄 CSV - All Expenses
+                  </button>
+                  <button
+                    onClick={() => {
+                      if (currentGroup) exportToPDF(currentGroup);
+                      setShowExportMenu(false);
+                    }}
+                    style={{
+                      width: '100%',
+                      padding: '10px 16px',
+                      backgroundColor: 'transparent',
+                      border: 'none',
+                      textAlign: 'left',
+                      cursor: 'pointer',
+                      fontSize: '13px',
+                      color: '#1f2937',
+                      borderBottom: '1px solid #e5e7eb'
+                    }}
+                    onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#f9fafb'}
+                    onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                  >
+                    📑 PDF - All Expenses
+                  </button>
+
+                  {/* Last 30 Days */}
+                  <div style={{ padding: '8px 16px', borderBottom: '1px solid #e5e7eb', fontSize: '12px', fontWeight: '600', color: '#6b7280' }}>
+                    LAST 30 DAYS
+                  </div>
+                  <button
+                    onClick={() => {
+                      if (currentGroup) {
+                        const end = new Date();
+                        const start = new Date();
+                        start.setDate(start.getDate() - 30);
+                        exportToCSV(currentGroup, { start, end });
+                      }
+                      setShowExportMenu(false);
+                    }}
+                    style={{
+                      width: '100%',
+                      padding: '10px 16px',
+                      backgroundColor: 'transparent',
+                      border: 'none',
+                      textAlign: 'left',
+                      cursor: 'pointer',
+                      fontSize: '13px',
+                      color: '#1f2937'
+                    }}
+                    onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#f9fafb'}
+                    onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                  >
+                    📄 CSV - Last 30 Days
+                  </button>
+                  <button
+                    onClick={() => {
+                      if (currentGroup) {
+                        const end = new Date();
+                        const start = new Date();
+                        start.setDate(start.getDate() - 30);
+                        exportToPDF(currentGroup, { start, end });
+                      }
+                      setShowExportMenu(false);
+                    }}
+                    style={{
+                      width: '100%',
+                      padding: '10px 16px',
+                      backgroundColor: 'transparent',
+                      border: 'none',
+                      textAlign: 'left',
+                      cursor: 'pointer',
+                      fontSize: '13px',
+                      color: '#1f2937',
+                      borderBottom: '1px solid #e5e7eb'
+                    }}
+                    onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#f9fafb'}
+                    onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                  >
+                    📑 PDF - Last 30 Days
+                  </button>
+
+                  {/* Settlements */}
+                  <button
+                    onClick={() => {
+                      if (currentGroup) exportSettlementsToCSV(currentGroup);
+                      setShowExportMenu(false);
+                    }}
+                    style={{
+                      width: '100%',
+                      padding: '10px 16px',
+                      backgroundColor: 'transparent',
+                      border: 'none',
+                      textAlign: 'left',
+                      cursor: 'pointer',
+                      fontSize: '13px',
+                      color: '#1f2937'
+                    }}
+                    onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#f9fafb'}
+                    onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                  >
+                    💰 Settlements CSV
+                  </button>
+                </div>
+              )}
+            </div>
+
+            <button
+              onClick={() => navigate('/groups')}
+              style={{
+                padding: '8px 12px',
+                backgroundColor: 'transparent',
+                color: '#6b7280',
+                border: '1px solid #e5e7eb',
+                borderRadius: '6px',
+                fontSize: '12px',
+                fontWeight: '500',
+                cursor: 'pointer'
+              }}
+              onMouseOver={(e) => {
+                e.currentTarget.style.backgroundColor = '#f3f4f6';
+                e.currentTarget.style.color = '#14b8a6';
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.backgroundColor = 'transparent';
+                e.currentTarget.style.color = '#6b7280';
+              }}
+            >
+              Switch Group
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* Balance Summary */}
-      <div style={{ backgroundColor: 'white', padding: '24px', borderBottom: '1px solid #e5e7eb' }}>
-        <div style={{ textAlign: 'center', maxWidth: '448px', margin: '0 auto' }}>
-          <p style={{ color: '#6b7280', marginBottom: '8px' }}>overall, you are</p>
-          <div style={{ marginBottom: '16px' }}>
+      {/* Balance Summary - Enhanced with gradient */}
+      <div style={{
+        background: isEven
+          ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)'
+          : isOwed
+            ? 'linear-gradient(135deg, #14b8a6 0%, #0d9488 100%)'
+            : 'linear-gradient(135deg, #f97316 0%, #ea580c 100%)',
+        padding: '32px 24px',
+        position: 'relative',
+        overflow: 'hidden'
+      }}>
+        {/* Decorative background circles */}
+        <div style={{
+          position: 'absolute',
+          top: '-50px',
+          right: '-50px',
+          width: '200px',
+          height: '200px',
+          borderRadius: '50%',
+          background: 'rgba(255, 255, 255, 0.1)',
+          filter: 'blur(40px)'
+        }} />
+        <div style={{
+          position: 'absolute',
+          bottom: '-30px',
+          left: '-30px',
+          width: '150px',
+          height: '150px',
+          borderRadius: '50%',
+          background: 'rgba(255, 255, 255, 0.1)',
+          filter: 'blur(30px)'
+        }} />
+
+        <div style={{ textAlign: 'center', maxWidth: '448px', margin: '0 auto', position: 'relative', zIndex: 1 }}>
+          <p style={{
+            color: 'rgba(255, 255, 255, 0.9)',
+            marginBottom: '12px',
+            fontSize: '14px',
+            fontWeight: '500',
+            letterSpacing: '0.5px',
+            textTransform: 'uppercase'
+          }}>
+            Overall Balance
+          </p>
+          <div style={{ marginBottom: '8px' }}>
             {isEven ? (
-              <span style={{ fontSize: '24px', fontWeight: '300', color: '#374151' }}>settled up</span>
+              <div>
+                <div style={{
+                  fontSize: '48px',
+                  fontWeight: '700',
+                  color: 'white',
+                  textShadow: '0 2px 10px rgba(0, 0, 0, 0.1)',
+                  marginBottom: '8px'
+                }}>
+                  ✓
+                </div>
+                <span style={{
+                  fontSize: '28px',
+                  fontWeight: '600',
+                  color: 'white',
+                  textShadow: '0 2px 10px rgba(0, 0, 0, 0.1)'
+                }}>
+                  All Settled Up!
+                </span>
+              </div>
             ) : (
               <div>
-                <span style={{ 
-                  fontSize: '24px', 
-                  fontWeight: '300', 
-                  color: isOwed ? '#14b8a6' : '#f97316' 
+                <p style={{
+                  fontSize: '16px',
+                  fontWeight: '500',
+                  color: 'rgba(255, 255, 255, 0.95)',
+                  marginBottom: '8px',
+                  textShadow: '0 1px 3px rgba(0, 0, 0, 0.1)'
                 }}>
-                  {isOwed ? 'owed' : 'owe'}
-                </span>
-                <div style={{ 
-                  fontSize: '32px', 
-                  fontWeight: '300', 
-                  marginTop: '4px', 
-                  color: isOwed ? '#14b8a6' : '#f97316' 
+                  You are {isOwed ? 'owed' : 'owing'}
+                </p>
+                <div style={{
+                  fontSize: '48px',
+                  fontWeight: '700',
+                  color: 'white',
+                  textShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+                  letterSpacing: '-1px',
+                  fontFamily: '"SF Mono", Monaco, "Cascadia Code", "Roboto Mono", Consolas, "Courier New", monospace'
                 }}>
                   {formatCurrency(Math.abs(netAmount), currentGroup?.baseCurrency || 'SGD')}
                 </div>
               </div>
             )}
           </div>
+
+          {/* Quick action hint */}
+          <div style={{
+            marginTop: '16px',
+            padding: '8px 16px',
+            background: 'rgba(255, 255, 255, 0.2)',
+            borderRadius: '20px',
+            backdropFilter: 'blur(10px)',
+            display: 'inline-block'
+          }}>
+            <p style={{
+              fontSize: '13px',
+              color: 'white',
+              margin: 0,
+              fontWeight: '500'
+            }}>
+              {isEven ? '🎉 Great job!' : isOwed ? '💰 Collect payments' : '💸 Settle your balance'}
+            </p>
+          </div>
         </div>
+      </div>
+
+      {/* Spending Insights */}
+      <div style={{
+        margin: '24px 16px',
+        maxWidth: '448px',
+        marginLeft: 'auto',
+        marginRight: 'auto'
+      }}>
+        <SpendingInsights group={currentGroup} userId={currentUser?.id} />
+      </div>
+
+      {/* Notification Settings */}
+      <div style={{
+        margin: '24px 16px',
+        maxWidth: '448px',
+        marginLeft: 'auto',
+        marginRight: 'auto'
+      }}>
+        <NotificationSettings />
       </div>
 
       {/* Members */}
@@ -333,8 +632,11 @@ const GroupDashboard: React.FC = () => {
                 >
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <div style={{ flex: '1' }}>
-                      <p style={{ fontWeight: '500', color: '#1f2937', marginBottom: '2px' }}>{expense.description}</p>
-                      <p style={{ fontSize: '14px', color: '#6b7280' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                        <p style={{ fontWeight: '500', color: '#1f2937', margin: 0 }}>{expense.description}</p>
+                        {expense.category && <CategoryBadge categoryId={expense.category} size="small" showLabel={false} />}
+                      </div>
+                      <p style={{ fontSize: '14px', color: '#6b7280', margin: 0 }}>
                         {paidByMember?.name || 'Someone'} paid {formatCurrency(expense.amount, expense.currency)}
                       </p>
                     </div>
@@ -355,10 +657,20 @@ const GroupDashboard: React.FC = () => {
         )}
       </div>
 
-      {/* Add Expense Button */}
+      {/* Activity Feed */}
+      <div style={{
+        margin: '24px 16px 100px',
+        maxWidth: '448px',
+        marginLeft: 'auto',
+        marginRight: 'auto'
+      }}>
+        {currentGroup && <ActivityFeed group={currentGroup} limit={8} />}
+      </div>
+
+      {/* Quick Add Expense Button */}
       <div style={{ position: 'fixed', bottom: '80px', right: '24px' }}>
         <button
-          onClick={() => navigate('/add-expense')}
+          onClick={() => setShowQuickAdd(true)}
           style={{
             width: '56px',
             height: '56px',
@@ -381,10 +693,14 @@ const GroupDashboard: React.FC = () => {
         </button>
       </div>
 
-      {/* Manage Members Modal */}
+      {/* Modals */}
       <ManageMembers
         isOpen={showManageMembers}
         onClose={() => setShowManageMembers(false)}
+      />
+      <QuickAddExpense
+        isOpen={showQuickAdd}
+        onClose={() => setShowQuickAdd(false)}
       />
     </div>
   );

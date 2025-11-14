@@ -16,6 +16,7 @@ import Settings from './screens/Settings';
 import { useAuthStore } from './stores/useAuthStore';
 import { useAppStore } from './stores/useAppStore';
 import { useGroupStore } from './stores/useGroupStore';
+import PageTransition from './components/PageTransition';
 
 function App() {
   const { initialize: initializeAuth, isAuthenticated } = useAuthStore();
@@ -50,48 +51,50 @@ function App() {
   return (
     <Router>
       <div className="min-h-screen bg-background">
-        <Routes>
-          {/* Public routes */}
-          <Route path="/onboarding" element={<OnboardingScreen />} />
-          <Route path="/login" element={<LoginScreen />} />
-          <Route path="/register" element={<RegisterScreen />} />
-          <Route path="/join-group" element={<JoinGroupScreen />} />
+        <PageTransition>
+          <Routes>
+            {/* Public routes */}
+            <Route path="/onboarding" element={<OnboardingScreen />} />
+            <Route path="/login" element={<LoginScreen />} />
+            <Route path="/register" element={<RegisterScreen />} />
+            <Route path="/join-group" element={<JoinGroupScreen />} />
 
-          {/* Protected routes */}
-          <Route path="/" element={
-            !isAuthenticated ? (
-              <Navigate to="/onboarding" replace />
-            ) : (
+            {/* Protected routes */}
+            <Route path="/" element={
+              !isAuthenticated ? (
+                <Navigate to="/onboarding" replace />
+              ) : (
+                <ProtectedRoute>
+                  <Layout />
+                </ProtectedRoute>
+              )
+            }>
+              <Route index element={<GroupDashboard />} />
+              <Route path="dashboard" element={<GroupDashboard />} />
+              <Route path="groups" element={<Groups />} />
+              <Route path="expenses" element={<ExpenseList />} />
+              <Route path="add-expense" element={<AddExpense />} />
+              <Route path="settlements" element={<SettlementView />} />
+              <Route path="settings" element={<Settings />} />
+            </Route>
+
+            <Route path="/create-group" element={
               <ProtectedRoute>
-                <Layout />
+                <CreateGroup />
               </ProtectedRoute>
-            )
-          }>
-            <Route index element={<GroupDashboard />} />
-            <Route path="dashboard" element={<GroupDashboard />} />
-            <Route path="groups" element={<Groups />} />
-            <Route path="expenses" element={<ExpenseList />} />
-            <Route path="add-expense" element={<AddExpense />} />
-            <Route path="settlements" element={<SettlementView />} />
-            <Route path="settings" element={<Settings />} />
-          </Route>
+            } />
 
-          <Route path="/create-group" element={
-            <ProtectedRoute>
-              <CreateGroup />
-            </ProtectedRoute>
-          } />
+            {/* Group specific routes */}
+            <Route path="/group/:groupId" element={
+              <ProtectedRoute>
+                <GroupDashboard />
+              </ProtectedRoute>
+            } />
 
-          {/* Group specific routes */}
-          <Route path="/group/:groupId" element={
-            <ProtectedRoute>
-              <GroupDashboard />
-            </ProtectedRoute>
-          } />
-
-          {/* Catch all - redirect to login */}
-          <Route path="*" element={<Navigate to="/onboarding" replace />} />
-        </Routes>
+            {/* Catch all - redirect to login */}
+            <Route path="*" element={<Navigate to="/onboarding" replace />} />
+          </Routes>
+        </PageTransition>
       </div>
     </Router>
   );

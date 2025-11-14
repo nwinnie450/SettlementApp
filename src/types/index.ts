@@ -460,3 +460,31 @@ export interface GroupManagementPermissions {
   canManageInvites: boolean;
   canViewAllExpenses: boolean;
 }
+
+// Notification types
+export enum NotificationType {
+  JOIN_REQUEST = 'join_request',
+  JOIN_APPROVED = 'join_approved',
+  JOIN_DECLINED = 'join_declined',
+  EXPENSE_ADDED = 'expense_added',
+  EXPENSE_UPDATED = 'expense_updated',
+  SETTLEMENT_COMPLETED = 'settlement_completed',
+  MEMBER_ADDED = 'member_added',
+  MEMBER_REMOVED = 'member_removed',
+  GROUP_UPDATED = 'group_updated'
+}
+
+export interface Notification {
+  id: string;
+  userId: string;
+  type: NotificationType;
+  title: string;
+  message: string;
+  groupId?: string;
+  groupName?: string;
+  relatedEntityId?: string;
+  isRead: boolean;
+  createdAt: string;
+  expiresAt?: string;
+  actionUrl?: string;
+}

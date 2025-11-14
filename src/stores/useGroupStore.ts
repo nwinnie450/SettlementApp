@@ -22,6 +22,13 @@ import {
   setActiveGroupId
 } from '../utils/storage';
 import { calculateOptimalPayments } from '../utils/settlements';
+import {
+  useNotificationStore,
+  createJoinRequestNotification,
+  createJoinApprovedNotification,
+  createExpenseAddedNotification,
+  createSettlementCompletedNotification
+} from './useNotificationStore';
 
 interface GroupState {
   // Data
@@ -549,6 +556,15 @@ export const useGroupStore = create<GroupState>((set, get) => ({
           isLoading: false
         });
 
+        // Create notification for group admin
+        const notification = createJoinRequestNotification(
+          group.createdBy,
+          group.id,
+          group.name,
+          request.userName || request.userEmail || 'Someone'
+        );
+        useNotificationStore.getState().addNotification(notification);
+
         return {
           success: true,
           requiresApproval: true,
@@ -607,6 +623,17 @@ export const useGroupStore = create<GroupState>((set, get) => ({
         groups,
         currentGroup: get().currentGroup?.id === groupId ? updatedGroup : get().currentGroup
       });
+
+      // Create notification for the user whose request was approved
+      if (invite.inviteeUserId) {
+        const notification = createJoinApprovedNotification(
+          invite.inviteeUserId,
+          groupId,
+          group.name
+        );
+        useNotificationStore.getState().addNotification(notification);
+      }
+
       return true;
     }
 
